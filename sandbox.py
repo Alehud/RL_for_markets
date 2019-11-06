@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 
 class Animal(ABC):
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self):
         super().__init__()
 
     @abstractmethod
@@ -14,12 +13,29 @@ class Animal(ABC):
 
 class Dog(Animal):
 
-    def __init__(self, value):
-        super().__init__(value)
+    def __init__(self):
+        super().__init__()
 
-    def make_(self):
-        print(self.value*100)
+    def make_noise(self):
+        print("Bark! Bark!")
 
 
-a = SubclassFromAbstract1(42)
-a.do_something()
+class Cat(Animal):
+
+    def __init__(self):
+        super().__init__()
+
+    def make_noise(self):
+        print("Meow! Meow!")
+
+
+Neri = Dog()
+Karin = Cat()
+
+Neri.make_noise()
+Karin.make_noise()
+
+# Would return an error
+# Alex = Animal()
+# Alex.make_noise()
+
