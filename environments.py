@@ -8,6 +8,8 @@ from gym import Env
 from abc import abstractmethod
 import pandas as pd
 
+import numpy as np
+from gym.spaces import Box
 
 class MarketEnvironment(Env):
     def __init__(self, sellers: list, buyers: list, max_steps: int, matcher, setting):
