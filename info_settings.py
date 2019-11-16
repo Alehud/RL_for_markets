@@ -46,12 +46,12 @@ class BlackBoxSetting(InformationSetting):
         :param agents: The dataframe of agents in the environment.
         """
         super().__init__(agents)
-        self.observation_space = Box(low=0, high=np.infty, shape=[1], dtype=np.float32)
 
-    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame):
-        last_offer = offers[offers['id'] == agent_id]['offer']
-        return np.array(last_offer)
+    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame, offers: pd.DataFrame):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
+
+        observation_state = dict(self_last_offer=self_last_offer)
+        return observation_state
 
 
 class SameSideSetting(InformationSetting):
@@ -64,15 +64,14 @@ class SameSideSetting(InformationSetting):
         :param agents: The dataframe of agents in the environment.
         """
         super().__init__(agents)
-        self.observation_space = Box(low=0, high=np.infty, shape=[agents.shape[0]],
-                                     dtype=np.float32)
 
-    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame):
+    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame, offers: pd.DataFrame):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
         agent_role = agents.loc[agents['id'] == agent_id]['role'].iloc[0]
-        obs = offers[['role', 'offer']]
-        obs.loc[obs['role'] != agent_role, 'offer'] = 0
-        return obs['offer'].to_numpy()
+        same_side_last_offers = np.array(offers.loc[offers['role'] == agent_role]['offer'])
+
+        observation_state = dict(self_last_offer=self_last_offer, same_side_last_offers=same_side_last_offers)
+        return observation_state
 
 
 class OtherSideSetting(InformationSetting):
@@ -85,18 +84,17 @@ class OtherSideSetting(InformationSetting):
         :param agents: The dataframe of agents in the environment.
         """
         super().__init__(agents)
-        self.observation_space = Box(low=0, high=np.infty, shape=[agents.shape[0]],
-                                     dtype=np.float32)
 
-    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame):
+    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame, offers: pd.DataFrame):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
         agent_role = agents.loc[agents['id'] == agent_id]['role'].iloc[0]
-        obs = offers[['role', 'offer']]
-        obs.loc[obs['role'] == agent_role, 'offer'] = 0
-        return obs['offer'].to_numpy()
+        other_side_last_offers = np.array(offers.loc[offers['role'] != agent_role]['offer'])
+
+        observation_state = dict(self_last_offer=self_last_offer, other_side_last_offers=other_side_last_offers)
+        return observation_state
 
 
-class FullInformationSetting(InformationSetting):
+class BothSidesSetting(InformationSetting):
     def __init__(self, agents):
         """
         The agent is aware about the all offers submitted by agents.
@@ -106,13 +104,16 @@ class FullInformationSetting(InformationSetting):
         :param agents: The dataframe of agents in the environment.
         """
         super().__init__(agents)
-        self.observation_space = Box(low=0, high=np.infty, shape=[agents.shape[0]],
-                                     dtype=np.float32)
 
-    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame):
-        obs = offers[['role', 'offer']]
-        return obs['offer'].to_numpy()
+    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame, offers: pd.DataFrame):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
+        agent_role = agents.loc[agents['id'] == agent_id]['role'].iloc[0]
+        same_side_last_offers = np.array(offers.loc[offers['role'] == agent_role]['offer'])
+        other_side_last_offers = np.array(offers.loc[offers['role'] != agent_role]['offer'])
+
+        observation_state = dict(self_last_offer=self_last_offer, same_side_last_offers=same_side_last_offers,
+                                 other_side_last_offers=other_side_last_offers)
+        return observation_state
 
 
 class DealInformationSetting(InformationSetting):
@@ -125,22 +126,16 @@ class DealInformationSetting(InformationSetting):
         :param agents: The dataframe of agents in the environment.
         """
         super().__init__(agents)
-        seller_n = sum(agents['role'] == 'Seller')
-        buyer_n = sum(agents['role'] == 'Buyer')
-        self.max_deal_n = min(seller_n, buyer_n)
-        self.observation_space = Box(low=0, high=np.infty, shape=[self.max_deal_n],
-                                     dtype=np.float32)
 
-    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame):
-        res = np.zeros(self.max_deal_n)
-        if deal_history is not None:
-            for i in range(len(deal_history)):
-                res[i] = deal_history[i]['deal_price']
-        return res
+    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame, offers: pd.DataFrame):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
+        completed_deals = [x['deal_price'] for x in deal_history]
+
+        observation_state = dict(self_last_offer=self_last_offer, completed_deals=completed_deals)
+        return observation_state
 
 
-class DealFullInformationSetting(InformationSetting):
+class FullInformationSetting(InformationSetting):
     def __init__(self, agents):
         """
         The agent is aware about the all deal values in the current round and all agent offers.
@@ -149,18 +144,15 @@ class DealFullInformationSetting(InformationSetting):
         The vector contains positive values for all successful offers and zeros otherwise.
         :param agents: The dataframe of agents in the environment.
         """
-        # the observation space for a single agent, is the size of all agents
-        # since the other side is unknow part of the observation will be fixed to zero
         super().__init__(agents)
-        self.deal_setting = DealInformationSetting(agents)
-        self.full_info_setting = FullInformationSetting(agents)
-        self.n_feats = agents.shape[0] + self.deal_setting.max_deal_n
-        self.observation_space = Box(low=0, high=np.infty, shape=[self.n_feats], dtype=np.float32)
-        # action space per agent should be the same
 
-    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame):
-        full_info_obs = self.full_info_setting.get_state(agent_id, deal_history, agents, offers)
-        deal_info_obs = self.deal_setting.get_state(agent_id, deal_history, agents, offers)
-        res = np.concatenate([full_info_obs, deal_info_obs])
-        return res
+    def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame, offers: pd.DataFrame):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
+        agent_role = agents.loc[agents['id'] == agent_id]['role'].iloc[0]
+        same_side_last_offers = np.array(offers.loc[offers['role'] == agent_role]['offer'])
+        other_side_last_offers = np.array(offers.loc[offers['role'] != agent_role]['offer'])
+        completed_deals = [x['deal_price'] for x in deal_history]
+
+        observation_state = dict(self_last_offer=self_last_offer, same_side_last_offers=same_side_last_offers,
+                                 other_side_last_offers=other_side_last_offers, completed_deals=completed_deals)
+        return observation_state
