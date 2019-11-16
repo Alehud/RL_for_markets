@@ -33,7 +33,9 @@ class MarketEnvironment(Env):
         self.matched: set = None
         self.deal_history: list = None
         self.offers = None
-        self.current_actions = dict()
+        
+        self.action_space = Box(np.array([a['res_price'] for a in self.sellers] + [0.0] * self.n_buyers, dtype=np.float32), 
+                                np.array([np.infty] * self.n_sellers + [a['res_price'] for a in self.buyers], dtype=np.float32))
         self.realized_deals = None
         self.time = None
         self.done = None
@@ -59,6 +61,15 @@ class MarketEnvironment(Env):
         )
         new_state = dict((agent_id, self.setting.get_state(agent_id, self.deal_history, self.agents, self.offers)) for agent_id in self.agents['id'])
         self.time += 1
+        
+        low_actions = [a['res_price'] if not self.done[a['id']] else -1 for a in self.sellers] + \
+                      [0.0 if not self.done[a['id']] else -1 for a in self.buyers]
+        high_actions = [np.inf if not self.done[a['id']] else -1 for a in self.sellers] + \
+                       [a['res_price'] if not self.done[a['id']] else -1 for a in self.buyers]
+        
+        self.action_space = Box(np.array(low_actions), 
+                                np.array(high_actions))
+        
         return new_state, rewards, self.done, None
 
     def reset(self):
@@ -72,7 +83,10 @@ class MarketEnvironment(Env):
         self.done = dict((x, False) for x in self.agents['id'].tolist())
         self._init_offers()
         self.realized_deals = []
-        self.current_actions = dict()
+        
+        self.action_space = Box(np.array([a['res_price'] for a in self.sellers] + [0.0] * self.n_buyers), 
+                                np.array([np.inf] * self.n_sellers + [a['res_price'] for a in self.buyers]))
+        
         new_state = dict((agent_id, self.setting.get_state(agent_id, self.deal_history, self.agents, self.offers)) for agent_id in self.agents['id'])
         return new_state
 
