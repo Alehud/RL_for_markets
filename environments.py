@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 from gym.spaces import Box
 
+
 class MarketEnvironment(Env):
     def __init__(self, sellers: list, buyers: list, max_steps: int, matcher, setting):
         """
@@ -61,7 +62,7 @@ class MarketEnvironment(Env):
             done=self.done,
             deal_history=self.deal_history
         )
-        new_state = dict((agent_id, self.setting.get_state(agent_id, self.deal_history, self.agents, self.offers)) for agent_id in self.agents['id'])
+        observation = dict((agent_id, self.setting.get_state(agent_id, self.deal_history, self.agents, self.offers)) for agent_id in self.agents['id'])
         self.time += 1
         
         low_actions = [a['res_price'] if not self.done[a['id']] else -1 for a in self.sellers] + \
@@ -72,7 +73,7 @@ class MarketEnvironment(Env):
         self.action_space = Box(np.array(low_actions), 
                                 np.array(high_actions))
         
-        return new_state, rewards, self.done, None
+        return observation, rewards, self.done, None
 
     def reset(self):
         """
