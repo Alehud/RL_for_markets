@@ -29,12 +29,13 @@ step1_offers = {
 }
 # print(step1_offers)
 observations, rewards, done, _ = market_env.step(step1_offers)
-print(observations)
-# print(rewards)
+print(pd.DataFrame(market_env.deal_history))
+# print(observations)
+print(rewards)
 # print(done)
 # print(market_env.offers)
 # print(market_env.realized_deals)
-# print(pd.DataFrame(market_env.deal_history))
+
 
 step2_offers = {
     'Buyer Kevin': 95,
@@ -42,12 +43,12 @@ step2_offers = {
 }
 # print(step2_offers)
 observations, rewards, done, _ = market_env.step(step2_offers)
-print(observations)
-# print(rewards)
+print(pd.DataFrame(market_env.deal_history))
+# print(observations)
+print(rewards)
 # print(done)
 # print(market_env.offers)
 # print(market_env.realized_deals)
-# print(pd.DataFrame(market_env.deal_history))
 
 step3_offers = {
     'Buyer Kevin': 105,
@@ -55,12 +56,12 @@ step3_offers = {
 }
 # print(step3_offers)
 observations, rewards, done, _ = market_env.step(step3_offers)
-print(observations)
-# print(rewards)
+print(pd.DataFrame(market_env.deal_history))
+# print(observations)
+print(rewards)
 # print(done)
 # print(market_env.offers)
 # print(market_env.realized_deals)
-# print(pd.DataFrame(market_env.deal_history))
 
 # print(market_env.sellers)
 # print(market_env.agents)
