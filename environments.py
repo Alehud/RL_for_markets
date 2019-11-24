@@ -7,13 +7,14 @@ __maintainer__ = "Thomas Asikis"
 from gym import Env
 from abc import abstractmethod
 import pandas as pd
+from info_settings import InformationSetting
 
 import numpy as np
 from gym.spaces import Box
 
 
 class MarketEnvironment(Env):
-    def __init__(self, sellers: list, buyers: list, max_steps: int, matcher, setting):
+    def __init__(self, sellers: list, buyers: list, max_steps: int, matcher, setting: dict):
         """
         An abstract market environment extending the typical gym environment
         :param sellers: A list containing all the agents that are extending the Seller agent
@@ -29,7 +30,8 @@ class MarketEnvironment(Env):
 
         # assign matcher and assign info setting
         self.matcher = matcher
-        self.setting = setting(self.agents)
+        self.info_setting = InformationSetting(self.agents)
+        self.setting = setting
 
         self.n_sellers = len(self.sellers)
         self.n_buyers = len(self.buyers)
@@ -62,7 +64,10 @@ class MarketEnvironment(Env):
             done=self.done,
             deal_history=self.deal_history
         )
-        observation = dict((agent_id, self.setting.get_state(agent_id, self.deal_history, self.agents, self.offers)) for agent_id in self.agents['id'])
+        observation = dict((agent_id, self.info_setting.get_state(agent_id=agent_id, deal_history=self.deal_history,
+                                                                  agents=self.agents, offers=self.offers, current_time=self.time,
+                                                                  max_time=self.max_steps, n_sellers=self.n_sellers,
+                                                                  n_buyers=self.n_buyers, bool_dict=self.setting)) for agent_id in self.agents['id'])
         self.time += 1
         
         low_actions = [a['res_price'] if not self.done[a['id']] else -1 for a in self.sellers] + \
@@ -90,7 +95,10 @@ class MarketEnvironment(Env):
         self.action_space = Box(np.array([a['res_price'] for a in self.sellers] + [0.0] * self.n_buyers), 
                                 np.array([np.inf] * self.n_sellers + [a['res_price'] for a in self.buyers]))
         
-        new_state = dict((agent_id, self.setting.get_state(agent_id, self.deal_history, self.agents, self.offers)) for agent_id in self.agents['id'])
+        new_state = dict((agent_id, self.info_setting.get_state(agent_id=agent_id, deal_history=self.deal_history,
+                                                                agents=self.agents, offers=self.offers, current_time=self.time,
+                                                                max_time=self.max_steps, n_sellers=self.n_sellers,
+                                                                n_buyers=self.n_buyers, bool_dict=self.setting)) for agent_id in self.agents['id'])
         return new_state
 
     def _init_offers(self):
