@@ -43,12 +43,20 @@ def compute_equilibrium_price(buyers, sellers):
     vv2, ii2 = compute_cdf(buyers, 0, max(sellers.max(), buyers.max()) + 1)
     vv2, ii2 = np.flip(vv2), len(buyers) - np.flip(ii2)
     
+    if len(vv) > len(vv2):
+        delta = len(vv) - len(vv2)
+        vv2 = np.pad(vv2, (0,delta), 'edge')
+        ii2 = np.pad(ii2, (0,delta), 'edge')
+    elif len(vv2) > len(vv):
+        delta = len(vv2) - len(vv)
+        vv = np.pad(vv, (0,delta), 'edge')
+        ii = np.pad(ii, (0,delta), 'edge')
+    
     test = (vv2 <= vv)
     if not np.any(test):
         return None
     else:
         d = np.argmax(test)
-        print(d)
         
         return (max(vv[d-1], vv2[d]), min(vv2[d-1], vv[d]))
     
