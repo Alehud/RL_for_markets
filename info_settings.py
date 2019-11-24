@@ -20,15 +20,15 @@ class InformationSetting:
         :param agents:
         """
         self.agents = agents
-        pass
 
     def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
-                  offers: pd.DataFrame, current_time, max_time, n_sellers, n_buyers, bool_dict: dict):
-        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])
+                  offers: pd.DataFrame, matched: set, current_time, max_time, n_sellers, n_buyers, bool_dict: dict):
+        self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])[0]
         agent_role = agents.loc[agents['id'] == agent_id]['role'].iloc[0]
-        same_side_last_offers = np.array(offers.loc[offers['role'] == agent_role]['offer'])
-        other_side_last_offers = np.array(offers.loc[offers['role'] != agent_role]['offer'])
-        completed_deals = np.array([x['deal_price'] for x in deal_history])
+        not_matched_offers = offers.loc[offers['id'].isin(matched) == False]
+        same_side_last_offers = np.array(not_matched_offers.loc[not_matched_offers['role'] == agent_role]['offer'])
+        other_side_last_offers = np.array(not_matched_offers.loc[not_matched_offers['role'] != agent_role]['offer'])
+        completed_deals = [(x['time'], x['deal_price']) for x in deal_history]
 
         observation_state = dict()
         if bool_dict['self_last_offer']:
