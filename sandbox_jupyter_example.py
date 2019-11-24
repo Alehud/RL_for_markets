@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 from agents import Buyer, Seller
 from environments import MarketEnvironment
-from info_settings import BlackBoxSetting, SameSideSetting, OtherSideSetting, FullInformationSetting, DealInformationSetting, DealFullInformationSetting
+from info_settings import InformationSetting
 from matchers import RandomMatcher
+from decision_maker import use_brain
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
 warnings.simplefilter("ignore")
@@ -16,8 +17,18 @@ kevin = Buyer('Buyer Kevin', 110)
 sellers = [john, nick]
 buyers = [alex, kevin]
 
+setting = {
+    'self_last_offer': True,
+    'same_side_last_offers': True,
+    'other_side_last_offers': True,
+    'completed_deals': False,
+    'current_time': True,
+    'max_time': False,
+    'n_sellers': False,
+    'n_buyers': False
+}
 market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_steps=30,
-                               matcher=RandomMatcher(reward_on_reference=True), setting=SameSideSetting)
+                               matcher=RandomMatcher(reward_on_reference=True), setting=setting)
 
 init_observation = market_env.reset()
 
@@ -29,9 +40,9 @@ step1_offers = {
 }
 # print(step1_offers)
 observations, rewards, done, _ = market_env.step(step1_offers)
-print(pd.DataFrame(market_env.deal_history))
-# print(observations)
-print(rewards)
+# print(pd.DataFrame(market_env.deal_history))
+print(observations)
+# print(rewards)
 # print(done)
 # print(market_env.offers)
 # print(market_env.realized_deals)
@@ -43,9 +54,9 @@ step2_offers = {
 }
 # print(step2_offers)
 observations, rewards, done, _ = market_env.step(step2_offers)
-print(pd.DataFrame(market_env.deal_history))
-# print(observations)
-print(rewards)
+# print(pd.DataFrame(market_env.deal_history))
+print(observations)
+# print(rewards)
 # print(done)
 # print(market_env.offers)
 # print(market_env.realized_deals)
@@ -56,15 +67,18 @@ step3_offers = {
 }
 # print(step3_offers)
 observations, rewards, done, _ = market_env.step(step3_offers)
-print(pd.DataFrame(market_env.deal_history))
-# print(observations)
-print(rewards)
+# print(pd.DataFrame(market_env.deal_history))
+print(observations)
+# use_brain(observations['Seller John'], agent_id='Seller John', environment=market_env)
+
+# print(rewards)
 # print(done)
 # print(market_env.offers)
 # print(market_env.realized_deals)
 
 # print(market_env.sellers)
 # print(market_env.agents)
+# print(market_env.agents['id'])
 # print(market_env.agent_ids)
 # print(market_env.agent_roles)
 # print(market_env.max_steps)
@@ -72,7 +86,7 @@ print(rewards)
 # print(market_env.setting)
 # print(market_env.n_sellers)
 # print(market_env.matched)
-# print(pd.DataFrame(market_env.deal_history))
+# print(market_env.deal_history)
 # print(market_env.offers)
 # print(market_env.current_actions)
 # print(market_env.realized_deals)
