@@ -4,18 +4,21 @@ from agents import Buyer, Seller
 from environments import MarketEnvironment
 from info_settings import InformationSetting
 from matchers import RandomMatcher
-# from decision_maker import use_brain
+from decision_maker import use_brain, determine_size_of_coefs
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
 warnings.simplefilter("ignore")
 
 
-john = Seller('Seller John', 100)
-nick = Seller('Seller Nick', 90)
-alex = Buyer('Buyer Alex', 130)
-kevin = Buyer('Buyer Kevin', 110)
-sellers = [john, nick]
-buyers = [alex, kevin]
+n_sellers = 10
+res_prices = np.random.normal(100, 5, n_sellers)
+names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
+sellers = [Seller(names[i], res_prices[i]) for i in range(n_sellers)]
+
+n_buyers = 10
+res_prices = np.random.normal(200, 5, n_buyers)
+names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
+buyers = [Buyer(names[i], res_prices[i]) for i in range(n_buyers)]
 
 setting = {
     'self_last_offer': True,
@@ -29,73 +32,31 @@ setting = {
 }
 market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_steps=30,
                                matcher=RandomMatcher(reward_on_reference=True), setting=setting)
-
 init_observation = market_env.reset()
 
-step1_offers = {
-    'Buyer Alex': 100,
-    'Buyer Kevin': 105,
-    'Seller John': 110,
-    'Seller Nick': 115
-}
-# print(step1_offers)
-observations, rewards, done, _ = market_env.step(step1_offers)
-# print(pd.DataFrame(market_env.deal_history))
-print(observations)
-# print(rewards)
-# print(done)
-# print(market_env.offers)
-# print(market_env.realized_deals)
+# Initial offers
+current_step_offers = {}
+for agent in sellers:
+    current_step_offers[agent.agent_id] = np.random.normal(200, 5)
+for agent in buyers:
+    current_step_offers[agent.agent_id] = np.random.normal(100, 5)
 
-print('-------------------------------------------------------------------------------------------------------')
+done = False
+while not done:
+    observations, rewards, done, _ = market_env.step(current_step_offers)
+    print('---------------------------------------------------------------------------------------------------------------')
 
-step2_offers = {
-    'Buyer Alex': 105,
-    'Buyer Kevin': 110,
-    'Seller John': 107,
-    'Seller Nick': 112
-}
-# print(step2_offers)
-observations, rewards, done, _ = market_env.step(step2_offers)
-# print(pd.DataFrame(market_env.deal_history))
-print(observations)
-# print(rewards)
-# print(done)
-# print(market_env.offers)
-# print(market_env.realized_deals)
-
-print('-------------------------------------------------------------------------------------------------------')
-step3_offers = {
-    'Buyer Alex': 105,
-    'Seller Nick': 100,
-}
-# print(step3_offers)
-observations, rewards, done, _ = market_env.step(step3_offers)
-# print(pd.DataFrame(market_env.deal_history))
-print(observations['Seller John'])
-
-# use_brain(observations['Seller John'], agent_id='Seller John', environment=market_env)
-
-# print(rewards)
-# print(done)
-# print(market_env.offers)
-# print(market_env.realized_deals)
-
-# print(market_env.sellers)
-# print(market_env.agents)
-# print(market_env.agents['id'])
-# print(market_env.agent_ids)
-# print(market_env.agent_roles)
-# print(market_env.max_steps)
-# print(market_env.matcher)
-# print(market_env.setting)
-# print(market_env.n_sellers)
-# print(market_env.matched)
-# print(market_env.deal_history)
-# print(market_env.offers)
-# print(market_env.current_actions)
-# print(market_env.realized_deals)
-# print(market_env.time)
-# print(market_env.done)
+    for agent in sellers:
+        size_coefs = determine_size_of_coefs(setting=setting, agent=agent, environment=market_env)
+        coefs = np.ones(size_coefs)
+        new_offer = use_brain(observations[agent.agent_id], agent=agent, environment=market_env, coefs=coefs)
+        current_step_offers[agent.agent_id] = new_offer
+    for agent in buyers:
+        size_coefs = determine_size_of_coefs(setting=setting, agent=agent, environment=market_env)
+        coefs = np.ones(size_coefs)
+        new_offer = use_brain(observations[agent.agent_id], agent=agent, environment=market_env, coefs=coefs)
+        current_step_offers[agent.agent_id] = new_offer
+    print(current_step_offers)
+    done = True
 
 
