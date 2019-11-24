@@ -4,6 +4,7 @@ __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "Thomas Asikis"
 
+from abc import abstractmethod
 
 class MarketAgent:
     def __init__(self, agent_id: str, reservation_price: float):
@@ -16,6 +17,10 @@ class MarketAgent:
         """
         self.agent_id = agent_id
         self.reservation_price = reservation_price
+        
+    @abstractmethod
+    def decide(self, observations):
+        return -1
 
 
 class Buyer(MarketAgent):
@@ -27,8 +32,8 @@ class Buyer(MarketAgent):
         willing to buy
         """
         super().__init__(agent_id, reservation_price)
-
-
+        
+        
 class Seller(MarketAgent):
     def __init__(self, agent_id: str,  reservation_price: float):
         """
