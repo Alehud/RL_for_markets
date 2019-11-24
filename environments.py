@@ -65,9 +65,10 @@ class MarketEnvironment(Env):
             deal_history=self.deal_history
         )
         observation = dict((agent_id, self.info_setting.get_state(agent_id=agent_id, deal_history=self.deal_history,
-                                                                  agents=self.agents, offers=self.offers, current_time=self.time,
-                                                                  max_time=self.max_steps, n_sellers=self.n_sellers,
-                                                                  n_buyers=self.n_buyers, bool_dict=self.setting)) for agent_id in self.agents['id'])
+                                                                  agents=self.agents, offers=self.offers, matched=self.matched,
+                                                                  current_time=self.time, max_time=self.max_steps,
+                                                                  n_sellers=self.n_sellers, n_buyers=self.n_buyers,
+                                                                  bool_dict=self.setting)) for agent_id in self.agents['id'])
         self.time += 1
         
         low_actions = [a['res_price'] if not self.done[a['id']] else -1 for a in self.sellers] + \
@@ -96,9 +97,10 @@ class MarketEnvironment(Env):
                                 np.array([np.inf] * self.n_sellers + [a['res_price'] for a in self.buyers]))
         
         new_state = dict((agent_id, self.info_setting.get_state(agent_id=agent_id, deal_history=self.deal_history,
-                                                                agents=self.agents, offers=self.offers, current_time=self.time,
-                                                                max_time=self.max_steps, n_sellers=self.n_sellers,
-                                                                n_buyers=self.n_buyers, bool_dict=self.setting)) for agent_id in self.agents['id'])
+                                                                agents=self.agents, offers=self.offers, matched=self.matched,
+                                                                current_time=self.time, max_time=self.max_steps,
+                                                                n_sellers=self.n_sellers, n_buyers=self.n_buyers,
+                                                                bool_dict=self.setting)) for agent_id in self.agents['id'])
         return new_state
 
     def _init_offers(self):

@@ -4,7 +4,7 @@ from agents import Buyer, Seller
 from environments import MarketEnvironment
 from info_settings import InformationSetting
 from matchers import RandomMatcher
-from decision_maker import use_brain
+# from decision_maker import use_brain
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
 warnings.simplefilter("ignore")
@@ -21,11 +21,11 @@ setting = {
     'self_last_offer': True,
     'same_side_last_offers': True,
     'other_side_last_offers': True,
-    'completed_deals': False,
+    'completed_deals': True,
     'current_time': True,
-    'max_time': False,
-    'n_sellers': False,
-    'n_buyers': False
+    'max_time': True,
+    'n_sellers': True,
+    'n_buyers': True
 }
 market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_steps=30,
                                matcher=RandomMatcher(reward_on_reference=True), setting=setting)
@@ -33,10 +33,10 @@ market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_steps=30,
 init_observation = market_env.reset()
 
 step1_offers = {
-    'Buyer Alex': 120,
+    'Buyer Alex': 100,
     'Buyer Kevin': 105,
     'Seller John': 110,
-    'Seller Nick': 105
+    'Seller Nick': 115
 }
 # print(step1_offers)
 observations, rewards, done, _ = market_env.step(step1_offers)
@@ -47,10 +47,13 @@ print(observations)
 # print(market_env.offers)
 # print(market_env.realized_deals)
 
+print('-------------------------------------------------------------------------------------------------------')
 
 step2_offers = {
-    'Buyer Kevin': 95,
-    'Seller John': 115,
+    'Buyer Alex': 105,
+    'Buyer Kevin': 110,
+    'Seller John': 107,
+    'Seller Nick': 112
 }
 # print(step2_offers)
 observations, rewards, done, _ = market_env.step(step2_offers)
@@ -61,14 +64,16 @@ print(observations)
 # print(market_env.offers)
 # print(market_env.realized_deals)
 
+print('-------------------------------------------------------------------------------------------------------')
 step3_offers = {
-    'Buyer Kevin': 105,
-    'Seller John': 100,
+    'Buyer Alex': 105,
+    'Seller Nick': 100,
 }
 # print(step3_offers)
 observations, rewards, done, _ = market_env.step(step3_offers)
 # print(pd.DataFrame(market_env.deal_history))
-print(observations)
+print(observations['Seller John'])
+
 # use_brain(observations['Seller John'], agent_id='Seller John', environment=market_env)
 
 # print(rewards)
