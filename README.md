@@ -1,5 +1,14 @@
-# GESS
-GESS course project on reinforcement learning in markets
+
+# GESS project
 
 
-This is our repository. Hello world!
+## Installing the library
+
+In the root directory, run:
+~~~
+pip3 install -e lib
+~~~
+You can then import from python with
+```python
+import doubleauction
+```

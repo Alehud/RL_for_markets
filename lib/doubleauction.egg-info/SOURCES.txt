@@ -1,0 +1,9 @@
+setup.py
+doubleauction/__init__.py
+doubleauction.egg-info/PKG-INFO
+doubleauction.egg-info/SOURCES.txt
+doubleauction.egg-info/dependency_links.txt
+doubleauction.egg-info/top_level.txt
+doubleauction/agents/__init__.py
+doubleauction/environments/__init__.py
+doubleauction/settings/__init__.py
