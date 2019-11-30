@@ -7,7 +7,7 @@ __maintainer__ = "Thomas Asikis"
 from gym import Env
 from abc import abstractmethod
 import pandas as pd
-from info_settings import InformationSetting
+from ..settings.info_settings import InformationSetting
 
 import numpy as np
 from gym.spaces import Box

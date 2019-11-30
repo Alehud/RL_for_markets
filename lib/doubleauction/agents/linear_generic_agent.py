@@ -1,4 +1,4 @@
-from agents import Buyer, Seller
+from .agents import Buyer, Seller
 import numpy as np
 
 

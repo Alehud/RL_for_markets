@@ -1,5 +1,5 @@
 
-from agents import Buyer, Seller
+from .agents import Buyer, Seller
 import scipy.stats
 import numpy as np
 

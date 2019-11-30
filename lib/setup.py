@@ -9,5 +9,7 @@ setup(
         "doubleauction.environments",
         "doubleauction.agents",
         "doubleauction.settings",
+        "doubleauction.util",
+        "doubleauction.matchers",
     ],
 )
