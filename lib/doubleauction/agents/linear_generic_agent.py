@@ -9,22 +9,44 @@ class LinearGenericBuyer(Buyer):
         """
         super().__init__(agent_id, reservation_price)
         self.setting = setting
+        self.coefs = np.array([])
+        self.observations = {}
+        if self.setting['previous_round_success']:
+            self.observations['previous_round_success'] = False
 
-    def compose_observations(self, observations, n_sellers: int, n_buyers: int, max_time: int):
+    def receive_observations_from_environment(self, observations):
+        if self.setting['self_last_offer']:
+            self.observations['self_last_offer'] = observations['self_last_offer']
+        if self.setting['same_side_last_offers']:
+            self.observations['same_side_last_offers'] = observations['same_side_last_offers']
+        if self.setting['other_side_last_offers']:
+            self.observations['other_side_last_offers'] = observations['other_side_last_offers']
+        if self.setting['completed_deals']:
+            self.observations['completed_deals'] = observations['completed_deals']
+        if self.setting['current_time']:
+            self.observations['current_time'] = observations['current_time']
+        if self.setting['max_time']:
+            self.observations['max_time'] = observations['max_time']
+        if self.setting['n_buyers']:
+            self.observations['n_buyers'] = observations['n_buyers']
+        if self.setting['n_sellers']:
+            self.observations['n_sellers'] = observations['n_sellers']
+
+    def compose_observation_vector(self, n_sellers: int, n_buyers: int, max_time: int):
         max_amount_of_deals = min(n_sellers, n_buyers)
         vals = np.array([self.reservation_price])
-        if 'self_last_offer' in observations:
-            vals = np.append(vals, observations['self_last_offer'])
-        if 'same_side_last_offers' in observations:
-            same_side_ofs = np.sort(observations['same_side_last_offers'])[::-1]
+        if self.setting['self_last_offer']:
+            vals = np.append(vals, self.observations['self_last_offer'])
+        if self.setting['same_side_last_offers']:
+            same_side_ofs = np.sort(self.observations['same_side_last_offers'])[::-1]
             same_side_ofs = np.concatenate((same_side_ofs, np.zeros(n_buyers - np.size(same_side_ofs))))
             vals = np.append(vals, same_side_ofs)
-        if 'other_side_last_offers' in observations:
-            other_side_ofs = np.sort(observations['other_side_last_offers'])
+        if self.setting['other_side_last_offers']:
+            other_side_ofs = np.sort(self.observations['other_side_last_offers'])
             other_side_ofs = np.concatenate((other_side_ofs, np.zeros(n_sellers - np.size(other_side_ofs))))
             vals = np.append(vals, other_side_ofs)
-        if 'completed_deals' in observations:
-            sorted_by_time = np.array(sorted(observations['completed_deals'], key=lambda tup: tup[0])[::-1])
+        if self.setting['completed_deals']:
+            sorted_by_time = np.array(sorted(self.observations['completed_deals'], key=lambda tup: tup[0])[::-1])
             if sorted_by_time.size == 0:
                 vals = np.concatenate((vals, np.zeros(max_amount_of_deals * 2)))
             else:
@@ -32,21 +54,24 @@ class LinearGenericBuyer(Buyer):
                 sorted_by_time = sorted_by_time.flatten()
                 vals = np.concatenate((vals, sorted_by_time))
                 vals = np.concatenate((vals, np.zeros(max_amount_of_deals * 2 - np.size(sorted_by_time))))
-        if 'current_time' in observations:
-            vals = np.append(vals, observations['current_time'])
-        if 'max_time' in observations:
-            vals = np.append(vals, observations['max_time'])
-        if 'n_sellers' in observations:
-            vals = np.append(vals, observations['n_sellers'])
-        if 'n_buyers' in observations:
-            vals = np.append(vals, observations['n_buyers'])
+        if self.setting['current_time']:
+            vals = np.append(vals, self.observations['current_time'])
+        if self.setting['max_time']:
+            vals = np.append(vals, self.observations['max_time'])
+        if self.setting['n_sellers']:
+            vals = np.append(vals, self.observations['n_sellers'])
+        if self.setting['n_buyers']:
+            vals = np.append(vals, self.observations['n_buyers'])
+        if self.setting['previous_round_success']:
+            vals = np.append(vals, self.observations['previous_round_success'])
         return vals
 
-    def decide(self, observations, coefs, n_sellers, n_buyers, max_time):
-        vals = self.compose_observations(observations, n_sellers, n_buyers, max_time)
-        return np.dot(vals, coefs)
+    def decide(self, n_sellers, n_buyers, max_time):
+        vals = self.compose_observation_vector(n_sellers=n_sellers, n_buyers=n_buyers, max_time=max_time)
+        return np.dot(vals, self.coefs)
 
-    def determine_size_of_coefs(self, n_sellers: int, n_buyers: int, max_time: int):
+    def determine_size_of_coefs(self, n_sellers: int, n_buyers: int):
+        # Reservation price is always known to agent
         size = 1
         if self.setting['self_last_offer']:
             size += 1
@@ -63,6 +88,8 @@ class LinearGenericBuyer(Buyer):
         if self.setting['n_sellers']:
             size += 1
         if self.setting['n_buyers']:
+            size += 1
+        if self.setting['previous_round_success']:
             size += 1
         return int(size)
 
@@ -74,22 +101,44 @@ class LinearGenericSeller(Seller):
         """
         super().__init__(agent_id, reservation_price)
         self.setting = setting
+        self.coefs = np.array([])
+        self.observations = {}
+        if self.setting['previous_round_success']:
+            self.observations['previous_round_success'] = False
 
-    def compose_observations(self, observations, n_sellers: int, n_buyers: int, max_time: int):
+    def receive_observations_from_environment(self, observations):
+        if self.setting['self_last_offer']:
+            self.observations['self_last_offer'] = observations['self_last_offer']
+        if self.setting['same_side_last_offers']:
+            self.observations['same_side_last_offers'] = observations['same_side_last_offers']
+        if self.setting['other_side_last_offers']:
+            self.observations['other_side_last_offers'] = observations['other_side_last_offers']
+        if self.setting['completed_deals']:
+            self.observations['completed_deals'] = observations['completed_deals']
+        if self.setting['current_time']:
+            self.observations['current_time'] = observations['current_time']
+        if self.setting['max_time']:
+            self.observations['max_time'] = observations['max_time']
+        if self.setting['n_buyers']:
+            self.observations['n_buyers'] = observations['n_buyers']
+        if self.setting['n_sellers']:
+            self.observations['n_sellers'] = observations['n_sellers']
+
+    def compose_observations(self, n_sellers: int, n_buyers: int, max_time: int):
         max_amount_of_deals = min(n_sellers, n_buyers)
         vals = np.array([self.reservation_price])
-        if 'self_last_offer' in observations:
-            vals = np.append(vals, observations['self_last_offer'])
-        if 'same_side_last_offers' in observations:
-            same_side_ofs = np.sort(observations['same_side_last_offers'])
+        if self.setting['self_last_offer']:
+            vals = np.append(vals, self.observations['self_last_offer'])
+        if self.setting['same_side_last_offers']:
+            same_side_ofs = np.sort(self.observations['same_side_last_offers'])
             same_side_ofs = np.concatenate((same_side_ofs, np.zeros(n_sellers - np.size(same_side_ofs))))
             vals = np.append(vals, same_side_ofs)
-        if 'other_side_last_offers' in observations:
-            other_side_ofs = np.sort(observations['other_side_last_offers'])[::-1]
+        if self.setting['other_side_last_offers']:
+            other_side_ofs = np.sort(self.observations['other_side_last_offers'])[::-1]
             other_side_ofs = np.concatenate((other_side_ofs, np.zeros(n_buyers - np.size(other_side_ofs))))
             vals = np.append(vals, other_side_ofs)
-        if 'completed_deals' in observations:
-            sorted_by_time = np.array(sorted(observations['completed_deals'], key=lambda tup: tup[0])[::-1])
+        if self.setting['completed_deals']:
+            sorted_by_time = np.array(sorted(self.observations['completed_deals'], key=lambda tup: tup[0])[::-1])
             if sorted_by_time.size == 0:
                 vals = np.concatenate((vals, np.zeros(max_amount_of_deals * 2)))
             else:
@@ -97,21 +146,24 @@ class LinearGenericSeller(Seller):
                 sorted_by_time = sorted_by_time.flatten()
                 vals = np.concatenate((vals, sorted_by_time))
                 vals = np.concatenate((vals, np.zeros(max_amount_of_deals * 2 - np.size(sorted_by_time))))
-        if 'current_time' in observations:
-            vals = np.append(vals, observations['current_time'])
-        if 'max_time' in observations:
-            vals = np.append(vals, observations['max_time'])
-        if 'n_sellers' in observations:
-            vals = np.append(vals, observations['n_sellers'])
-        if 'n_buyers' in observations:
-            vals = np.append(vals, observations['n_buyers'])
+        if self.setting['current_time']:
+            vals = np.append(vals, self.observations['current_time'])
+        if self.setting['max_time']:
+            vals = np.append(vals, self.observations['max_time'])
+        if self.setting['n_sellers']:
+            vals = np.append(vals, self.observations['n_sellers'])
+        if self.setting['n_buyers']:
+            vals = np.append(vals, self.observations['n_buyers'])
+        if self.setting['previous_round_success']:
+            vals = np.append(vals, self.observations['previous_round_success'])
         return vals
 
-    def decide(self, observations, coefs, n_sellers, n_buyers, max_time):
-        vals = self.compose_observations(observations, n_sellers, n_buyers, max_time)
-        return np.dot(vals, coefs)
+    def decide(self, n_sellers, n_buyers, max_time):
+        vals = self.compose_observations(n_sellers, n_buyers, max_time)
+        return np.dot(vals, self.coefs)
 
-    def determine_size_of_coefs(self, n_sellers: int, n_buyers: int, max_time: int):
+    def determine_size_of_coefs(self, n_sellers: int, n_buyers: int):
+        # Reservation price is always known to agent
         size = 1
         if self.setting['self_last_offer']:
             size += 1
@@ -128,5 +180,7 @@ class LinearGenericSeller(Seller):
         if self.setting['n_sellers']:
             size += 1
         if self.setting['n_buyers']:
+            size += 1
+        if self.setting['previous_round_success']:
             size += 1
         return int(size)
