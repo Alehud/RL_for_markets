@@ -5,5 +5,14 @@ doubleauction.egg-info/SOURCES.txt
 doubleauction.egg-info/dependency_links.txt
 doubleauction.egg-info/top_level.txt
 doubleauction/agents/__init__.py
+doubleauction/agents/agents.py
+doubleauction/agents/linear_generic_agent.py
+doubleauction/agents/random_agent.py
 doubleauction/environments/__init__.py
+doubleauction/environments/environments.py
+doubleauction/matchers/__init__.py
+doubleauction/matchers/matchers.py
 doubleauction/settings/__init__.py
+doubleauction/settings/info_settings.py
+doubleauction/util/__init__.py
+doubleauction/util/util.py

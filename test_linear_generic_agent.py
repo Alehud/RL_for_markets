@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from environments import MarketEnvironment
-from matchers import RandomMatcher
-from linear_generic_agent import LinearGenericBuyer, LinearGenericSeller
+from doubleauction.environments import MarketEnvironment
+from doubleauction.matchers import RandomMatcher
+from doubleauction.agents.linear_generic_agent import LinearGenericBuyer, LinearGenericSeller
 import matplotlib.pyplot as plt
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often

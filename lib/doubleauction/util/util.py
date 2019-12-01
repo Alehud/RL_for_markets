@@ -17,7 +17,8 @@ def generate_seller_prices_paper(count, discrete=False):
         return np.random.randint(low = 73, high = 118+1, size=count)
     else:
         return np.random.uniform(low = 73, high = 118, size=count)
-    
+
+
 def compute_cdf(values, start, end):
     values2 = np.sort(np.append(values, [start, end]))
     
@@ -57,6 +58,4 @@ def compute_equilibrium_price(buyers, sellers):
         return None
     else:
         d = np.argmax(test)
-        
-        return (max(vv[d-1], vv2[d]), min(vv2[d-1], vv[d]))
-    
+        return max(vv[d-1], vv2[d]), min(vv2[d-1], vv[d])

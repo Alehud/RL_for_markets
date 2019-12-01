@@ -1,4 +1,4 @@
-from .agents import Buyer, Seller
+from doubleauction.agents import Buyer, Seller
 import numpy as np
 
 
@@ -13,10 +13,9 @@ class LinearGenericBuyer(Buyer):
         self.max_time = max_time
         self.setting = setting
 
-    def decide(self, observations, coefs):
+    def compose_observations(self, observations):
         max_amount_of_deals = min(self.n_sellers, self.n_buyers)
         vals = np.array([self.reservation_price])
-
         if 'self_last_offer' in observations:
             vals = np.append(vals, observations['self_last_offer'])
         if 'same_side_last_offers' in observations:
@@ -36,7 +35,6 @@ class LinearGenericBuyer(Buyer):
                 sorted_by_time = sorted_by_time.flatten()
                 vals = np.concatenate((vals, sorted_by_time))
                 vals = np.concatenate((vals, np.zeros(max_amount_of_deals * 2 - np.size(sorted_by_time))))
-
         if 'current_time' in observations:
             vals = np.append(vals, observations['current_time'])
         if 'max_time' in observations:
@@ -45,7 +43,10 @@ class LinearGenericBuyer(Buyer):
             vals = np.append(vals, observations['n_sellers'])
         if 'n_buyers' in observations:
             vals = np.append(vals, observations['n_buyers'])
+        return vals
 
+    def decide(self, observations, coefs):
+        vals = self.compose_observations(observations)
         return np.dot(vals, coefs)
 
     def determine_size_of_coefs(self):
@@ -80,10 +81,9 @@ class LinearGenericSeller(Seller):
         self.max_time = max_time
         self.setting = setting
 
-    def decide(self, observations, coefs):
+    def compose_observations(self, observations):
         max_amount_of_deals = min(self.n_sellers, self.n_buyers)
         vals = np.array([self.reservation_price])
-
         if 'self_last_offer' in observations:
             vals = np.append(vals, observations['self_last_offer'])
         if 'same_side_last_offers' in observations:
@@ -103,7 +103,6 @@ class LinearGenericSeller(Seller):
                 sorted_by_time = sorted_by_time.flatten()
                 vals = np.concatenate((vals, sorted_by_time))
                 vals = np.concatenate((vals, np.zeros(max_amount_of_deals * 2 - np.size(sorted_by_time))))
-
         if 'current_time' in observations:
             vals = np.append(vals, observations['current_time'])
         if 'max_time' in observations:
@@ -112,7 +111,10 @@ class LinearGenericSeller(Seller):
             vals = np.append(vals, observations['n_sellers'])
         if 'n_buyers' in observations:
             vals = np.append(vals, observations['n_buyers'])
+        return vals
 
+    def decide(self, observations, coefs):
+        vals = self.compose_observations(observations)
         return np.dot(vals, coefs)
 
     def determine_size_of_coefs(self):

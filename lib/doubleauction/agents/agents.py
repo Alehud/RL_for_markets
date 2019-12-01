@@ -6,6 +6,7 @@ __maintainer__ = "Thomas Asikis"
 
 from abc import abstractmethod
 
+
 class MarketAgent:
     def __init__(self, agent_id: str, reservation_price: float):
         """
@@ -32,6 +33,10 @@ class Buyer(MarketAgent):
         willing to buy
         """
         super().__init__(agent_id, reservation_price)
+
+    @abstractmethod
+    def decide(self, observations):
+        return -1
         
         
 class Seller(MarketAgent):
@@ -43,3 +48,7 @@ class Seller(MarketAgent):
         willing to sell
         """
         super().__init__(agent_id, reservation_price)
+
+    @abstractmethod
+    def decide(self, observations):
+        return -1
