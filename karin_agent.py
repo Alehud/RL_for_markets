@@ -5,10 +5,10 @@ import numpy as np
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
 warnings.simplefilter("ignore")
-from agents import Buyer, Seller
-from environments import MarketEnvironment
-import info_settings as info
-from matchers import RandomMatcher
+from doubleauction.agents import Buyer, Seller
+from doubleauction.environments import MarketEnvironment
+import doubleauction.info_settings as info
+from doubleauction.matchers import RandomMatcher
 
 
 def generate_offers(market_environment, obs, param):

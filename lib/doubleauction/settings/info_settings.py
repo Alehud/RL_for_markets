@@ -23,6 +23,19 @@ class InformationSetting:
 
     def get_state(self, agent_id: str, deal_history: pd.DataFrame, agents: pd.DataFrame,
                   offers: pd.DataFrame, matched: set, current_time, max_time, n_sellers, n_buyers, bool_dict: dict):
+        """
+        The method that generates the state for the agents, based on the information setting.
+        :param agent_id: usually a string, a unique id for an agent
+        :param deal_history: the dictionary containing all the successful deals till now
+        :param agents: the dataframe containing the agent information
+        :param offers: The dataframe containing the past offers from agents
+        :param current_time: integer, current time in the game
+        :param max_time: integer, maximum allowed time of the game
+        :param n_sellers: integer, the amount of sellers
+        :param n_buyers: integer, the amount of buyers
+        :param bool_dict: a dictionary with boolean values containing information about which observations should be turned on/off
+        :return: the observation space
+        """
         self_last_offer = np.array(offers.loc[offers['id'] == agent_id]['offer'])[0]
         agent_role = agents.loc[agents['id'] == agent_id]['role'].iloc[0]
         not_matched_offers = offers.loc[offers['id'].isin(matched) == False]
@@ -49,16 +62,4 @@ class InformationSetting:
             observation_state['n_buyers'] = n_buyers
         return observation_state
 
-        """
-        The method that generates the state for the agents, based on the information setting.
-        :param agent_id: usually a string, a unique id for an agent
-        :param deal_history: the dictionary containing all the successful deals till now
-        :param agents: the dataframe containing the agent information
-        :param offers: The dataframe containing the past offers from agents
-        :param current_time: integer, current time in the game
-        :param max_time: integer, maximum allowed time of the game
-        :param n_sellers: integer, the amount of sellers
-        :param n_buyers: integer, the amount of buyers
-        :param bool_dict: a dictionary with boolean values containing information about which observations should be turned on/off
-        :return: the observation space
-        """
+
