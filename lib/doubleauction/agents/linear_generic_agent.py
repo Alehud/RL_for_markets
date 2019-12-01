@@ -9,8 +9,6 @@ class LinearGenericBuyer(Buyer):
         """
         super().__init__(agent_id, reservation_price)
         self.setting = setting
-        self.coefs = np.array([])
-        self.observations = {}
         if self.setting['previous_round_success']:
             self.observations['previous_round_success'] = False
 
@@ -101,8 +99,6 @@ class LinearGenericSeller(Seller):
         """
         super().__init__(agent_id, reservation_price)
         self.setting = setting
-        self.coefs = np.array([])
-        self.observations = {}
         if self.setting['previous_round_success']:
             self.observations['previous_round_success'] = False
 

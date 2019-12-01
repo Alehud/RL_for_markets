@@ -56,7 +56,7 @@ for agent in buyers:
 for round in range(10):
     print("ROUND", round)
 
-    init_observation = market_env.reset()
+    market_env.reset()
 
     # Initial offers are generated
     current_step_offers = {}

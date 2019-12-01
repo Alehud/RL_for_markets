@@ -5,6 +5,7 @@ __version__ = "0.1"
 __maintainer__ = "Thomas Asikis"
 
 from abc import abstractmethod
+import numpy as np
 
 
 class MarketAgent:
@@ -18,9 +19,16 @@ class MarketAgent:
         """
         self.agent_id = agent_id
         self.reservation_price = reservation_price
+        self.coefs = np.array([])
+        self.observations = {}
+        self.done = False
         
     @abstractmethod
     def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+        return -1
+
+    @abstractmethod
+    def receive_observations_from_environment(self, observations):
         return -1
 
 
