@@ -23,6 +23,7 @@ loop over games:
     - each agent determines the length of the coefs vector he wants as an input
     - for each agent a coefs vector is generated using the information about its length,
       n_sellers, n_buyers, max_time, and the previous coefs of this agent
+    - rewards are reset
     loop over rounds:
         - initial offers are generated
         loop over time steps:
@@ -31,6 +32,7 @@ loop over games:
             - each agent generates his/her new offer using observations received and coefs
             - new offers of all agents are composed into a list of current offers
         - data about the current round is collected and averaged
+        - reward is accumulated
     - data about the current game is collected and averaged
         
         
