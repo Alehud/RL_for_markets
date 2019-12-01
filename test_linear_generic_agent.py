@@ -26,12 +26,12 @@ setting = {
 
 res_prices = np.random.normal(100, 5, n_sellers)
 names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
-sellers = np.array([LinearGenericSeller(agent_id=names[i], reservation_price=res_prices[i], n_sellers=n_sellers, n_buyers=n_buyers, max_time=max_time, setting=setting) for i in range(n_sellers)])
+sellers = np.array([LinearGenericSeller(agent_id=names[i], reservation_price=res_prices[i], setting=setting) for i in range(n_sellers)])
 
 
 res_prices = np.random.normal(200, 5, n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
-buyers = np.array([LinearGenericBuyer(agent_id=names[i], reservation_price=res_prices[i], n_sellers=n_sellers, n_buyers=n_buyers, max_time=max_time, setting=setting) for i in range(n_buyers)])
+buyers = np.array([LinearGenericBuyer(agent_id=names[i], reservation_price=res_prices[i], setting=setting) for i in range(n_buyers)])
 
 market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_steps=max_time, matcher=RandomMatcher(reward_on_reference=True), setting=setting)
 init_observation = market_env.reset()
@@ -48,6 +48,7 @@ fig, ax = plt.subplots(1, 1, sharey=True, figsize=(8, 8), tight_layout=True)
 ax.set_xlim(95, 205)
 done = {"Dummy": False}
 i = 1
+
 while False in done.values():
     observations, rewards, done, _ = market_env.step(current_step_offers)
     done_sellers = np.array(list(done.values())[:n_sellers]) == False
@@ -57,14 +58,14 @@ while False in done.values():
 
     current_step_offers.clear()
     for agent in sellers[done_sellers]:
-        size_coefs = agent.determine_size_of_coefs()
+        size_coefs = agent.determine_size_of_coefs(n_sellers, n_buyers, max_time)
         coefs = np.array([0.05, 0.95, 0])
-        new_offer = agent.decide(observations=observations[agent.agent_id], coefs=coefs)
+        new_offer = agent.decide(observations=observations[agent.agent_id], coefs=coefs, n_sellers=n_sellers, n_buyers=n_buyers, max_time=max_time)
         current_step_offers[agent.agent_id] = new_offer
     for agent in buyers[done_buyers]:
-        size_coefs = agent.determine_size_of_coefs()
+        size_coefs = agent.determine_size_of_coefs(n_sellers, n_buyers, max_time)
         coefs = np.array([0.05, 0.95, 0])
-        new_offer = agent.decide(observations=observations[agent.agent_id], coefs=coefs)
+        new_offer = agent.decide(observations=observations[agent.agent_id], coefs=coefs, n_sellers=n_sellers, n_buyers=n_buyers, max_time=max_time)
         current_step_offers[agent.agent_id] = new_offer
 
     _, _, bars0 = ax.hist(list(current_step_offers.values()), 50, color='blue')
