@@ -24,7 +24,7 @@ class MarketAgent:
         self.done = False
         
     @abstractmethod
-    def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+    def decide(self, n_sellers=None, n_buyers=None, max_time=None):
         return -1
 
     @abstractmethod
@@ -43,7 +43,7 @@ class Buyer(MarketAgent):
         super().__init__(agent_id, reservation_price)
 
     @abstractmethod
-    def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+    def decide(self, n_sellers=None, n_buyers=None, max_time=None):
         return -1
         
         
@@ -58,5 +58,5 @@ class Seller(MarketAgent):
         super().__init__(agent_id, reservation_price)
 
     @abstractmethod
-    def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+    def decide(self, n_sellers=None, n_buyers=None, max_time=None):
         return -1
