@@ -60,11 +60,13 @@ for g in range(5):
         size_coefs = agent.determine_size_of_coefs(n_buyers=n_buyers, n_sellers=n_sellers)
         agent.coefs = np.array([0.05, 0.95, 0])
 
-    # Reset agents' rewards
+    # Reset agents' rewards and observations
     for agent in sellers:
         agent.reward = 0.0
+        agent.observations = {}
     for agent in buyers:
         agent.reward = 0.0
+        agent.observations = {}
 
     # Loop over rounds
     for r in range(5):

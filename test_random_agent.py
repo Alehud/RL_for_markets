@@ -39,11 +39,13 @@ for g in range(5):
 
     # HERE AGENTS LEARN AND ADJUST THEIR COEFS (random agents don't need any coefficients, they don't learn)
 
-    # Reset agents' rewards
+    # Reset agents' rewards and observations
     for agent in sellers:
         agent.reward = 0.0
+        agent.observations = {}
     for agent in buyers:
         agent.reward = 0.0
+        agent.observations = {}
 
     # Loop over rounds
     for r in range(5):
