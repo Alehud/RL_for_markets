@@ -13,33 +13,53 @@ class LinearGenericAgent(MarketAgent):
         if self.setting['previous_success']:
             self.observations['previous_success'] = False
 
-    def receive_observations_from_environment(self, observations):
+    def receive_observations_from_environment(self, env):
+        agents = env.agents
+        rewards = env.rewards
+        deal_history = env.deal_history
+
+        self.reward += rewards[self.agent_id]
+
+        agent_info = agents[agents['id'] == self.agent_id]
+        agent_role = agent_info['role'].iloc[0]
+        same_side_agents = agents[agents['role'] == agent_role]
+        other_side_agents = agents[agents['role'] != agent_role]
+        self_last_offer = agent_info['last_offer'].iloc[0]
+        same_side_last_offers = np.array(same_side_agents['last_offer'])
+        same_side_res_prices = np.array(same_side_agents['res_price'])
+        same_side_not_done = len(same_side_agents.loc[same_side_agents['done'] == False])
+        other_side_last_offers = np.array(other_side_agents['last_offer'])
+        other_side_res_prices = np.array(other_side_agents['res_price'])
+        other_side_not_done = len(other_side_agents.loc[other_side_agents['done'] == False])
+        completed_deals = [(x['time'], x['deal_price']) for x in deal_history]
+        previous_success = agent_info['previous_success'].iloc[0]
+
         if self.setting['self_last_offer']:
-            self.observations['self_last_offer'] = observations['self_last_offer']
+            self.observations['self_last_offer'] = self_last_offer
         if self.setting['same_side_last_offers']:
-            self.observations['same_side_last_offers'] = observations['same_side_last_offers']
+            self.observations['same_side_last_offers'] = same_side_last_offers
         if self.setting['same_side_res_prices']:
-            self.observations['same_side_res_prices'] = observations['same_side_res_prices']
+            self.observations['same_side_res_prices'] = same_side_res_prices
         if self.setting['same_side_not_done']:
-            self.observations['same_side_not_done'] = observations['same_side_not_done']
+            self.observations['same_side_not_done'] = same_side_not_done
         if self.setting['other_side_last_offers']:
-            self.observations['other_side_last_offers'] = observations['other_side_last_offers']
+            self.observations['other_side_last_offers'] = other_side_last_offers
         if self.setting['other_side_res_prices']:
-            self.observations['other_side_res_prices'] = observations['other_side_res_prices']
+            self.observations['other_side_res_prices'] = other_side_res_prices
         if self.setting['other_side_not_done']:
-            self.observations['other_side_not_done'] = observations['other_side_not_done']
+            self.observations['other_side_not_done'] = other_side_not_done
         if self.setting['completed_deals']:
-            self.observations['completed_deals'] = observations['completed_deals']
+            self.observations['completed_deals'] = completed_deals
         if self.setting['current_time']:
-            self.observations['current_time'] = observations['current_time']
+            self.observations['current_time'] = env.time
         if self.setting['max_time']:
-            self.observations['max_time'] = observations['max_time']
+            self.observations['max_time'] = env.max_time
         if self.setting['n_buyers']:
-            self.observations['n_buyers'] = observations['n_buyers']
+            self.observations['n_buyers'] = env.n_buyers
         if self.setting['n_sellers']:
-            self.observations['n_sellers'] = observations['n_sellers']
+            self.observations['n_sellers'] = env.n_sellers
         if self.setting['previous_success']:
-            self.observations['previous_success'] = observations['previous_success']
+            self.observations['previous_success'] = previous_success
 
     @abstractmethod
     def decide(self, n_sellers=None, n_buyers=None, max_time=None):

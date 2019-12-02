@@ -28,6 +28,7 @@ class MarketEnvironment(Env):
         self.not_done_sellers = None
         self.not_done_buyers = None
         self.deal_history: list = None
+        self.rewards: dict = None
         self.time = None
         self.if_round_done = None
 
@@ -51,60 +52,21 @@ class MarketEnvironment(Env):
         self.agents['last_offer'] = 0.0
         self.not_done_sellers = np.array([False] * self.n_sellers)
         self.not_done_buyers = np.array([False] * self.n_buyers)
-
-    def get_observation_state(self, agent_id: str):
-        """
-        The method that generates the state for the agents, based on the information setting.
-        :param agent_id: usually a string, a unique id for an agent
-        :return: the observation space
-        """
-        agent_info = self.agents[self.agents['id'] == agent_id]
-        agent_role = agent_info['role'].iloc[0]
-        same_side_agents = self.agents[self.agents['role'] == agent_role]
-        other_side_agents = self.agents[self.agents['role'] != agent_role]
-        self_last_offer = agent_info['last_offer'].iloc[0]
-        same_side_last_offers = np.array(same_side_agents['last_offer'])
-        same_side_res_prices = np.array(same_side_agents['res_price'])
-        same_side_not_done = len(same_side_agents.loc[same_side_agents['done'] == False])
-        other_side_last_offers = np.array(other_side_agents['last_offer'])
-        other_side_res_prices = np.array(other_side_agents['res_price'])
-        other_side_not_done = len(other_side_agents.loc[other_side_agents['done'] == False])
-        completed_deals = [(x['time'], x['deal_price']) for x in self.deal_history]
-        previous_success = agent_info['previous_success'].iloc[0]
-
-        observation_state = {
-            'self_last_offer': self_last_offer,
-            'same_side_last_offers': same_side_last_offers,
-            'same_side_res_prices': same_side_res_prices,
-            'same_side_not_done': same_side_not_done,
-            'other_side_last_offers': other_side_last_offers,
-            'other_side_res_prices': other_side_res_prices,
-            'other_side_not_done': other_side_not_done,
-            'completed_deals': completed_deals,
-            'current_time': self.time,
-            'max_time': self.max_time,
-            'n_sellers': self.n_sellers,
-            'n_buyers': self.n_buyers,
-            'previous_success': previous_success
-        }
-        return observation_state
+        self.rewards = {agent_id: 0 for agent_id in self.agents['id']}
 
     def step(self, current_offers):
         """
-        The step function takes the agents actions and returns the new state, reward,
-        if the state is terminal and any other info.
+        The step function takes the agents' new offers and simulates one time step in the market
         :param current_offers: a dictionary containing the offer per agent
-        :return: a tuple of 4 objects: the object describing the next state, a data structure
-        containing the reward per agent, a data structure containing boolean values expressing
-        whether an agent reached a terminal state
         """
-        rewards = self.matcher.match(
+        # self.deal_history and self.agents are also updated in match()
+        self.rewards = self.matcher.match(
             current_offers=current_offers,
             env_time=self.time,
             agents=self.agents,
             deal_history=self.deal_history
         )
-        observations = dict((agent_id, self.get_observation_state(agent_id=agent_id)) for agent_id in self.agents['id'])
+        # observations = dict((agent_id, self.get_observation_state(agent_id=agent_id)) for agent_id in self.agents['id'])
         self.time += 1
 
         # Updating masks (arrays of booleans) for agents who are not done yet in this round
@@ -130,8 +92,6 @@ class MarketEnvironment(Env):
         high_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
 
         self.action_space = Box(np.array(low_actions), np.array(high_actions))
-
-        return observations, rewards, self.if_round_done
 
     @abstractmethod
     def render(self, mode='human'):
