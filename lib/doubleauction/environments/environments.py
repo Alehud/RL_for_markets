@@ -83,16 +83,16 @@ class MarketEnvironment(Env):
             self.agents.loc[self.agents['done'] == True, 'previous_success'] = True
 
         # Determining action space
-        temp = self.agents[['role', 'res_price', 'done']]
-        temp.loc[temp['done'] == True, 'res_price'] = -1
-        temp.loc[temp['role'] == 'Buyer', 'res_price'] = 0
-        low_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
-        temp = self.agents[['role', 'res_price', 'done']]
-        temp.loc[temp['done'] == True, 'res_price'] = -1
-        temp.loc[temp['role'] == 'Seller', 'res_price'] = np.inf
-        high_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
-
-        self.action_space = Box(np.array(low_actions), np.array(high_actions))
+        # temp = self.agents[['role', 'res_price', 'done']]
+        # temp.loc[temp['done'] == True, 'res_price'] = -1
+        # temp.loc[temp['role'] == 'Buyer', 'res_price'] = 0
+        # low_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
+        # temp = self.agents[['role', 'res_price', 'done']]
+        # temp.loc[temp['done'] == True, 'res_price'] = -1
+        # temp.loc[temp['role'] == 'Seller', 'res_price'] = np.inf
+        # high_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
+        #
+        # self.action_space = Box(np.array(low_actions), np.array(high_actions))
 
     @abstractmethod
     def render(self, mode='human'):
