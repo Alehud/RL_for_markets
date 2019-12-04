@@ -29,7 +29,11 @@ class RandomBuyer(RandomAgent):
 
     def decide(self):
         demand = scipy.stats.halflogistic(-7.692926601910835e-08, 31.41266555783104).rvs()
-        return np.abs(self.reservation_price - demand)
+        new_offer = np.abs(self.reservation_price - demand)
+        if new_offer > self.reservation_price:
+            return self.reservation_price
+        else:
+            return new_offer
 
 
 class RandomSeller(RandomAgent):
@@ -41,4 +45,8 @@ class RandomSeller(RandomAgent):
 
     def decide(self):
         demand = scipy.stats.expon(0.0, 33.327542829759196).rvs()
-        return self.reservation_price + demand
+        new_offer = self.reservation_price + demand
+        if new_offer < self.reservation_price:
+            return self.reservation_price
+        else:
+            return new_offer

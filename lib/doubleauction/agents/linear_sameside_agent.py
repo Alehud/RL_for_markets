@@ -56,7 +56,11 @@ class LinearSameSideBuyer(LinearSameSideAgent):
 
     def decide(self, n_sellers=None, n_buyers=None, max_time=None):
         vals = self.compose_observation_vector(n_buyers=n_buyers)
-        return np.dot(vals, self.coefs)
+        new_offer = np.dot(vals, self.coefs)
+        if new_offer > self.reservation_price:
+            return self.reservation_price
+        else:
+            return new_offer
 
     def determine_size_of_coefs(self, n_buyers: int):
         # Reservation price is always known to agent
@@ -84,7 +88,11 @@ class LinearSameSideSeller(LinearSameSideAgent):
 
     def decide(self, n_sellers=None, n_buyers=None, max_time=None):
         vals = self.compose_observation_vector(n_sellers=n_sellers)
-        return np.dot(vals, self.coefs)
+        new_offer = np.dot(vals, self.coefs)
+        if new_offer < self.reservation_price:
+            return self.reservation_price
+        else:
+            return new_offer
 
     def determine_size_of_coefs(self, n_sellers: int):
         # Reservation price is always known to agent

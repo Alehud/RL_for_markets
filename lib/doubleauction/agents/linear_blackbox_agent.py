@@ -44,7 +44,11 @@ class LinearBlackBoxBuyer(LinearBlackBoxAgent):
 
     def decide(self):
         vals = self.compose_observation_vector()
-        return np.dot(vals, self.coefs)
+        new_offer = np.dot(vals, self.coefs)
+        if new_offer > self.reservation_price:
+            return self.reservation_price
+        else:
+            return new_offer
 
 
 class LinearBlackBoxSeller(LinearBlackBoxAgent):
@@ -62,4 +66,8 @@ class LinearBlackBoxSeller(LinearBlackBoxAgent):
 
     def decide(self):
         vals = self.compose_observation_vector()
-        return np.dot(vals, self.coefs)
+        new_offer = np.dot(vals, self.coefs)
+        if new_offer < self.reservation_price:
+            return self.reservation_price
+        else:
+            return new_offer
