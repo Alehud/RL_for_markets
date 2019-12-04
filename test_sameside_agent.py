@@ -10,7 +10,7 @@ warnings.simplefilter("ignore")
 
 # Define the initial number of agents
 n_sellers = 5
-n_buyers = 5
+n_buyers = 3
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -32,7 +32,7 @@ for g in range(1):
 
     # Define parameters of each round
     max_time = 30
-    matcher = RandomMatcher(reward_on_reference=True)
+    matcher = RandomMatcher(reward_on_reference=False)
 
     # Create market environment
     market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_time=max_time, matcher=matcher)
@@ -81,7 +81,8 @@ for g in range(1):
             for agent in buyers:
                 agent.receive_observations_from_environment(market_env)
 
-            # print(sellers[0].observations)
+            print(sellers[0].observations)
+            print(sellers[0].reward)
 
             # Clearing current offers
             current_offers.clear()

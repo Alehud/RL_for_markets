@@ -22,7 +22,6 @@ class LinearBlackBoxAgent(MarketAgent):
         previous_success = agent_info['previous_success'].iloc[0]
 
         self.observations['self_last_offer'] = self_last_offer
-        self.observations['current_time'] = env.time
         self.observations['previous_success'] = previous_success
 
     @abstractmethod
@@ -40,7 +39,6 @@ class LinearBlackBoxBuyer(LinearBlackBoxAgent):
     def compose_observation_vector(self):
         vals = np.array([self.reservation_price])
         vals = np.append(vals, self.observations['self_last_offer'])
-        vals = np.append(vals, self.observations['current_time'])
         vals = np.append(vals, self.observations['previous_success'])
         return vals
 
@@ -59,7 +57,6 @@ class LinearBlackBoxSeller(LinearBlackBoxAgent):
     def compose_observation_vector(self):
         vals = np.array([self.reservation_price])
         vals = np.append(vals, self.observations['self_last_offer'])
-        vals = np.append(vals, self.observations['current_time'])
         vals = np.append(vals, self.observations['previous_success'])
         return vals
 

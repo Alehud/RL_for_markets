@@ -16,18 +16,18 @@ n_buyers = 5
 # All agents are the same for now
 setting = {
     'self_last_offer': True,
-    'same_side_last_offers': False,
-    'same_side_res_prices': False,
-    'same_side_not_done': False,
-    'other_side_last_offers': False,
-    'other_side_res_prices': False,
-    'other_side_not_done': False,
-    'completed_deals': False,
+    'same_side_last_offers': True,
+    'same_side_res_prices': True,
+    'same_side_not_done': True,
+    'other_side_last_offers': True,
+    'other_side_res_prices': True,
+    'other_side_not_done': True,
+    'completed_deals': True,
     'current_time': True,
-    'max_time': False,
-    'n_sellers': False,
-    'n_buyers': False,
-    'previous_success': False
+    'max_time': True,
+    'n_sellers': True,
+    'n_buyers': True,
+    'previous_success': True
 }
 res_prices = np.random.normal(100, 5, n_sellers)
 names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
@@ -42,7 +42,7 @@ buyers = np.array([LinearGenericBuyer(agent_id=names[i], reservation_price=res_p
 # ax.set_xlim(95, 205)
 
 # Loop over games
-for g in range(5):
+for g in range(1):
     print("GAME", g, '=================================================================================================================')
 
     # Define parameters of each round
@@ -55,10 +55,10 @@ for g in range(5):
     # HERE AGENTS LEARN AND ADJUST THEIR COEFS (for now the are constant)
     for agent in sellers:
         size_coefs = agent.determine_size_of_coefs(n_buyers=n_buyers, n_sellers=n_sellers)
-        agent.coefs = np.array([0.05, 0.95, 0])
+        agent.coefs = np.array([0.05, 0.95] + [0]*(size_coefs - 2))
     for agent in buyers:
         size_coefs = agent.determine_size_of_coefs(n_buyers=n_buyers, n_sellers=n_sellers)
-        agent.coefs = np.array([0.05, 0.95, 0])
+        agent.coefs = np.array([0.05, 0.95] + [0]*(size_coefs - 2))
 
     # Reset agents' rewards and observations
     for agent in sellers:
@@ -69,7 +69,7 @@ for g in range(5):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(5):
+    for r in range(1):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -95,6 +95,8 @@ for g in range(5):
                 agent.receive_observations_from_environment(market_env)
             for agent in buyers:
                 agent.receive_observations_from_environment(market_env)
+
+            print(sellers[0].observations)
 
             # Clearing current offers
             current_offers.clear()

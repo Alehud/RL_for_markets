@@ -6,11 +6,14 @@ import matplotlib.pyplot as plt
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
 warnings.simplefilter("ignore")
+import time
+
+start = time.time()
 
 
 # Define the initial number of agents
-n_sellers = 5
-n_buyers = 5
+n_sellers = 250
+n_buyers = 250
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -27,11 +30,11 @@ buyers = np.array([RandomBuyer(agent_id=names[i], reservation_price=res_prices[i
 # ax.set_xlim(95, 205)
 
 # Loop over games
-for g in range(5):
+for g in range(1):
     print("GAME", g, '=================================================================================================================')
 
     # Define parameters of each round
-    max_time = 30
+    max_time = 50
     matcher = RandomMatcher(reward_on_reference=True)
 
     # Create market environment
@@ -48,7 +51,7 @@ for g in range(5):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(5):
+    for r in range(10):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -91,3 +94,6 @@ for g in range(5):
             # plt.draw()
             # plt.pause(0.1)
             # _ = [b.remove() for b in bars0]
+
+stop = time.time()
+print(stop-start)

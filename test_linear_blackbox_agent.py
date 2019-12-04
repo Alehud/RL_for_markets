@@ -27,21 +27,21 @@ buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_
 # ax.set_xlim(95, 205)
 
 # Loop over games
-for g in range(5):
+for g in range(1):
     print("GAME", g, '=================================================================================================================')
 
     # Define parameters of each round
     max_time = 30
-    matcher = RandomMatcher(reward_on_reference=True)
+    matcher = RandomMatcher(reward_on_reference=False)
 
     # Create market environment
     market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_time=max_time, matcher=matcher)
 
     # HERE AGENTS LEARN AND ADJUST THEIR COEFS (for now the are constant)
     for agent in sellers:
-        agent.coefs = np.array([0.05, 0.95, 0, 0])
+        agent.coefs = np.array([1-0.75497335, 0.75497335, 13.1468725])
     for agent in buyers:
-        agent.coefs = np.array([0.05, 0.95, 0, 0])
+        agent.coefs = np.array([1-0.75497335, 0.75497335, -13.1468725])
 
     # Reset agents' rewards and observations
     for agent in sellers:
@@ -52,7 +52,7 @@ for g in range(5):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(5):
+    for r in range(10):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -72,6 +72,8 @@ for g in range(5):
             i += 1
             # Environment calculates what happens
             market_env.step(current_offers)
+
+            # print(market_env.agents)
 
             # All agents receive observations from what environment generated
             for agent in sellers:
