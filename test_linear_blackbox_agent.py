@@ -10,25 +10,22 @@ warnings.simplefilter("ignore")
 
 
 # Define the initial number of agents
-n_sellers = 3
-n_buyers = 3
+n_sellers = 5
+n_buyers = 5
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
-# res_prices = generate_seller_prices_paper(discrete=False, count=n_sellers)
-res_prices = np.array([70, 70, 110])
+res_prices = generate_seller_prices_paper(discrete=False, count=n_sellers)
 names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
 sellers = np.array([LinearBlackBoxSeller(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_sellers)])
-# res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
-res_prices = np.array([150, 105, 150])
-print(res_prices)
+res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
 buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
 
 
 # For plotting
-# fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
-# ax.set_xlim(75, 150)
+fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
+ax.set_xlim(75, 150)
 
 # Loop over games
 for g in range(1):
@@ -56,7 +53,7 @@ for g in range(1):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(1):
+    for r in range(2):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -76,8 +73,7 @@ for g in range(1):
             i += 1
             # Environment calculates what happens
             market_env.step(current_offers)
-            # print(np.count_nonzero(market_env.not_done_buyers))
-            # print(market_env.agents)
+            print(market_env.agents)
 
             # All agents receive observations from what environment generated
             for agent in sellers:
@@ -97,7 +93,7 @@ for g in range(1):
                 current_offers[agent.agent_id] = new_offer
 
             # for plotting
-            # _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
-            # plt.draw()
-            # plt.pause(0.1)
-            # _ = [b.remove() for b in bars0]
+            _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
+            plt.draw()
+            plt.pause(0.1)
+            _ = [b.remove() for b in bars0]
