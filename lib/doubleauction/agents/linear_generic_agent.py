@@ -1,4 +1,4 @@
-from doubleauction.agents import Buyer, Seller, MarketAgent
+from doubleauction.agents import MarketAgent
 import numpy as np
 from abc import abstractmethod
 
@@ -25,11 +25,11 @@ class LinearGenericAgent(MarketAgent):
         same_side_agents = agents[agents['role'] == agent_role]
         other_side_agents = agents[agents['role'] != agent_role]
         self_last_offer = agent_info['last_offer'].iloc[0]
-        same_side_last_offers = np.array(same_side_agents['last_offer'])
-        same_side_res_prices = np.array(same_side_agents['res_price'])
+        same_side_last_offers = np.array(same_side_agents.loc[same_side_agents['done'] == False]['last_offer'])
+        same_side_res_prices = np.array(same_side_agents.loc[same_side_agents['done'] == False]['res_price'])
         same_side_not_done = len(same_side_agents.loc[same_side_agents['done'] == False])
-        other_side_last_offers = np.array(other_side_agents['last_offer'])
-        other_side_res_prices = np.array(other_side_agents['res_price'])
+        other_side_last_offers = np.array(other_side_agents.loc[other_side_agents['done'] == False]['last_offer'])
+        other_side_res_prices = np.array(other_side_agents.loc[other_side_agents['done'] == False]['res_price'])
         other_side_not_done = len(other_side_agents.loc[other_side_agents['done'] == False])
         completed_deals = [(x['time'], x['deal_price']) for x in deal_history]
         previous_success = agent_info['previous_success'].iloc[0]
@@ -82,10 +82,22 @@ class LinearGenericBuyer(LinearGenericAgent):
             same_side_ofs = np.sort(self.observations['same_side_last_offers'])[::-1]
             same_side_ofs = np.concatenate((same_side_ofs, np.zeros(n_buyers - np.size(same_side_ofs))))
             vals = np.append(vals, same_side_ofs)
+        if self.setting['same_side_res_prices']:
+            same_side_res = np.sort(self.observations['same_side_res_prices'])[::-1]
+            same_side_res = np.concatenate((same_side_res, np.zeros(n_buyers - np.size(same_side_res))))
+            vals = np.append(vals, same_side_res)
+        if self.setting['same_side_not_done']:
+            vals = np.append(vals, self.observations['same_side_not_done'])
         if self.setting['other_side_last_offers']:
             other_side_ofs = np.sort(self.observations['other_side_last_offers'])
             other_side_ofs = np.concatenate((other_side_ofs, np.zeros(n_sellers - np.size(other_side_ofs))))
             vals = np.append(vals, other_side_ofs)
+        if self.setting['other_side_res_prices']:
+            other_side_res = np.sort(self.observations['other_side_res_prices'])
+            other_side_res = np.concatenate((other_side_res, np.zeros(n_sellers - np.size(other_side_res))))
+            vals = np.append(vals, other_side_res)
+        if self.setting['other_side_not_done']:
+            vals = np.append(vals, self.observations['other_side_not_done'])
         if self.setting['completed_deals']:
             sorted_by_time = np.array(sorted(self.observations['completed_deals'], key=lambda tup: tup[0])[::-1])
             if sorted_by_time.size == 0:
@@ -118,8 +130,16 @@ class LinearGenericBuyer(LinearGenericAgent):
             size += 1
         if self.setting['same_side_last_offers']:
             size += n_buyers
+        if self.setting['same_side_res_prices']:
+            size += n_buyers
+        if self.setting['same_side_not_done']:
+            size += 1
         if self.setting['other_side_last_offers']:
             size += n_sellers
+        if self.setting['other_side_res_prices']:
+            size += n_sellers
+        if self.setting['other_side_not_done']:
+            size += 1
         if self.setting['completed_deals']:
             size += min(n_sellers, n_buyers) * 2
         if self.setting['current_time']:
@@ -151,10 +171,22 @@ class LinearGenericSeller(LinearGenericAgent):
             same_side_ofs = np.sort(self.observations['same_side_last_offers'])[::-1]
             same_side_ofs = np.concatenate((same_side_ofs, np.zeros(n_sellers - np.size(same_side_ofs))))
             vals = np.append(vals, same_side_ofs)
+        if self.setting['same_side_res_prices']:
+            same_side_res = np.sort(self.observations['same_side_res_prices'])[::-1]
+            same_side_res = np.concatenate((same_side_res, np.zeros(n_sellers - np.size(same_side_res))))
+            vals = np.append(vals, same_side_res)
+        if self.setting['same_side_not_done']:
+            vals = np.append(vals, self.observations['same_side_not_done'])
         if self.setting['other_side_last_offers']:
             other_side_ofs = np.sort(self.observations['other_side_last_offers'])
             other_side_ofs = np.concatenate((other_side_ofs, np.zeros(n_buyers - np.size(other_side_ofs))))
             vals = np.append(vals, other_side_ofs)
+        if self.setting['other_side_res_prices']:
+            other_side_res = np.sort(self.observations['other_side_res_prices'])
+            other_side_res = np.concatenate((other_side_res, np.zeros(n_buyers - np.size(other_side_res))))
+            vals = np.append(vals, other_side_res)
+        if self.setting['other_side_not_done']:
+            vals = np.append(vals, self.observations['other_side_not_done'])
         if self.setting['completed_deals']:
             sorted_by_time = np.array(sorted(self.observations['completed_deals'], key=lambda tup: tup[0])[::-1])
             if sorted_by_time.size == 0:
@@ -187,8 +219,16 @@ class LinearGenericSeller(LinearGenericAgent):
             size += 1
         if self.setting['same_side_last_offers']:
             size += n_sellers
+        if self.setting['same_side_res_prices']:
+            size += n_sellers
+        if self.setting['same_side_not_done']:
+            size += 1
         if self.setting['other_side_last_offers']:
             size += n_buyers
+        if self.setting['other_side_res_prices']:
+            size += n_buyers
+        if self.setting['other_side_not_done']:
+            size += 1
         if self.setting['completed_deals']:
             size += min(n_sellers, n_buyers) * 2
         if self.setting['current_time']:
