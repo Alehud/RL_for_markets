@@ -43,7 +43,6 @@ class MarketEnvironment(Env):
     def reset(self):
         """
         Resets the environment to an initial state, so that the game can be repeated.
-        :return: the initial state so that a new round begins.
         """
         self.deal_history = list()
         self.time = 0
@@ -52,6 +51,7 @@ class MarketEnvironment(Env):
         self.agents['last_offer'] = 0.0
         self.not_done_sellers = np.array([False] * self.n_sellers)
         self.not_done_buyers = np.array([False] * self.n_buyers)
+        # These are current rewards in the round, not the cumulative rewards of agents
         self.rewards = {agent_id: 0 for agent_id in self.agents['id']}
 
     def step(self, current_offers):
@@ -78,8 +78,8 @@ class MarketEnvironment(Env):
                 not (False in list(self.agents[self.agents['role'] == 'Seller']['done'])) or \
                 not (False in list(self.agents[self.agents['role'] == 'Buyer']['done'])):
             self.if_round_done = True
-            self.agents[self.agents['done'] == False]['previous_success'] = False
-            self.agents[self.agents['done'] == True]['previous_success'] = True
+            self.agents.loc[self.agents['done'] == False, 'previous_success'] = False
+            self.agents.loc[self.agents['done'] == True, 'previous_success'] = True
 
         # Determining action space
         temp = self.agents[['role', 'res_price', 'done']]
