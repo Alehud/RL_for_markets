@@ -92,8 +92,8 @@ class RandomMatcher(Matcher):
                     rewards[considered_buyer['id']] = considered_buyer['res_price'] - considered_buyer['last_offer']
                     rewards[considered_seller['id']] = considered_seller['last_offer'] - considered_seller['res_price']
                 else:
-                    rewards[considered_buyer['id']] = considered_buyer['last_offer'] - deal_price
-                    rewards[considered_seller['id']] = deal_price - considered_seller['last_offer']
+                    rewards[considered_buyer['id']] = considered_buyer['res_price'] - deal_price
+                    rewards[considered_seller['id']] = deal_price - considered_seller['res_price']
 
                 matching = dict(Seller=considered_seller['id'], Buyer=considered_buyer['id'], time=env_time, deal_price=deal_price)
                 deal_history.append(matching)
