@@ -72,11 +72,12 @@ class MarketEnvironment(Env):
         # Updating masks (arrays of booleans) for agents who are not done yet in this round
         self.not_done_sellers = ~np.array(self.agents[self.agents['role'] == 'Seller']['done'])
         self.not_done_buyers = ~np.array(self.agents[self.agents['role'] == 'Buyer']['done'])
+        not_done_agents = self.agents[~self.agents['done']]
 
         # Checking if the round terminated
         if (self.time == self.max_time) or \
-                not (False in list(self.agents[self.agents['role'] == 'Seller']['done'])) or \
-                not (False in list(self.agents[self.agents['role'] == 'Buyer']['done'])):
+                not (True in list(self.not_done_buyers)) or not (True in list(self.not_done_sellers)) or \
+                not_done_agents[not_done_agents['role'] == 'Seller']['res_price'].min() > not_done_agents[not_done_agents['role'] == 'Buyer']['res_price'].max():
             self.if_round_done = True
             self.agents.loc[self.agents['done'] == False, 'previous_success'] = False
             self.agents.loc[self.agents['done'] == True, 'previous_success'] = True

@@ -10,15 +10,17 @@ warnings.simplefilter("ignore")
 
 
 # Define the initial number of agents
-n_sellers = 5
-n_buyers = 5
+n_sellers = 3
+n_buyers = 3
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
-res_prices = generate_seller_prices_paper(discrete=False, count=n_sellers)
+# res_prices = generate_seller_prices_paper(discrete=False, count=n_sellers)
+res_prices = np.array([70, 70, 110])
 names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
 sellers = np.array([LinearBlackBoxSeller(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_sellers)])
-res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
+# res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
+res_prices = np.array([150, 105, 150])
 print(res_prices)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
 buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
@@ -54,7 +56,7 @@ for g in range(1):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(2):
+    for r in range(1):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -75,7 +77,7 @@ for g in range(1):
             # Environment calculates what happens
             market_env.step(current_offers)
             # print(np.count_nonzero(market_env.not_done_buyers))
-            print(market_env.agents)
+            # print(market_env.agents)
 
             # All agents receive observations from what environment generated
             for agent in sellers:
