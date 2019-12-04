@@ -7,109 +7,92 @@ __maintainer__ = "Thomas Asikis"
 from gym import Env
 from abc import abstractmethod
 import pandas as pd
-from ..settings.info_settings import InformationSetting
-
 import numpy as np
 from gym.spaces import Box
 
 
 class MarketEnvironment(Env):
-    def __init__(self, sellers: list, buyers: list, max_steps: int, matcher, setting: dict):
+    def __init__(self, sellers: np.ndarray, buyers: np.ndarray, max_time: int, matcher):
         """
         An abstract market environment extending the typical gym environment
         :param sellers: A list containing all the agents that are extending the Seller agent
         :param buyers: A list containing all the agents that are extending the Buyer agent
-        :param max_steps: the maximum number of steps that runs for this round.
+        :param max_time: the maximum number of steps that runs for this round.
         """
-        self.sellers = [dict(id=x.agent_id, res_price=x.reservation_price, role="Seller") for x in sellers]
-        self.buyers = [dict(id=x.agent_id, res_price=x.reservation_price, role="Buyer") for x in buyers]
-        self.agents = pd.DataFrame(self.sellers + self.buyers)
-        self.agent_ids = set(self.agents['id'].unique())
-        self.agent_roles = self.agents[['id', 'role']].set_index('id').to_dict()['role']
-        self.max_steps = max_steps
-
-        # assign matcher and assign info setting
+        self.n_sellers = np.size(sellers)
+        self.n_buyers = np.size(buyers)
+        self.max_time = max_time
         self.matcher = matcher
-        self.info_setting = InformationSetting(self.agents)
-        self.setting = setting
-
-        self.n_sellers = len(self.sellers)
-        self.n_buyers = len(self.buyers)
-        self.matched: set = None
+        self.agents = pd.DataFrame([dict(id=x.agent_id, res_price=x.reservation_price, role='Seller', done=None, last_offer=None, stop_time=None, previous_success=False) for x in sellers] +
+                                   [dict(id=x.agent_id, res_price=x.reservation_price, role='Buyer', done=None, last_offer=None, stop_time=None, previous_success=False) for x in buyers])
+        self.not_done_sellers = None
+        self.not_done_buyers = None
         self.deal_history: list = None
-        self.offers = None
-        
-        self.action_space = Box(np.array([a['res_price'] for a in self.sellers] + [0.0] * self.n_buyers, dtype=np.float32), 
-                                np.array([np.infty] * self.n_sellers + [a['res_price'] for a in self.buyers], dtype=np.float32))
-        self.realized_deals = None
+        self.rewards: dict = None
         self.time = None
-        self.done = None
-        self.reset()
+        self.if_round_done = None
 
-    def step(self, actions):
-        """
-        The step function takes the agents actions and returns the new state, reward,
-        if the state is terminal and any other info.
-        :param actions: a dictionary containing the action per agent
-        :return: a tuple of 4 objects: the object describing the next state, a data structure
-        containing the reward per agent, a data structure containing boolean values expressing
-        whether an agent reached a terminal state, and finally a dictionary object containing any extra info.
-        """
-        rewards = self.matcher.match(
-            current_actions=actions,
-            offers=self.offers,
-            env_time=self.time,
-            agents=self.agents,
-            matched=self.matched,
-            done=self.done,
-            deal_history=self.deal_history
+        sellers_res_prices = self.agents[self.agents['role'] == 'Seller']['res_price']
+        buyers_res_prices = self.agents[self.agents['role'] == 'Buyer']['res_price']
+        self.action_space = Box(
+            np.concatenate((np.array(sellers_res_prices, dtype=np.float32), np.array([0.0] * self.n_buyers, dtype=np.float32))),
+            np.concatenate((np.array([np.infty] * self.n_sellers, dtype=np.float32), np.array(buyers_res_prices, dtype=np.float32)))
         )
-        observation = dict((agent_id, self.info_setting.get_state(agent_id=agent_id, deal_history=self.deal_history,
-                                                                  agents=self.agents, offers=self.offers, matched=self.matched,
-                                                                  current_time=self.time, max_time=self.max_steps,
-                                                                  n_sellers=self.n_sellers, n_buyers=self.n_buyers,
-                                                                  bool_dict=self.setting)) for agent_id in self.agents['id'])
-        self.time += 1
-        
-        low_actions = [a['res_price'] if not self.done[a['id']] else -1 for a in self.sellers] + \
-                      [0.0 if not self.done[a['id']] else -1 for a in self.buyers]
-        high_actions = [np.inf if not self.done[a['id']] else -1 for a in self.sellers] + \
-                       [a['res_price'] if not self.done[a['id']] else -1 for a in self.buyers]
-        
-        self.action_space = Box(np.array(low_actions), 
-                                np.array(high_actions))
-        
-        return observation, rewards, self.done, None
+        self.reset()
 
     def reset(self):
         """
         Resets the environment to an initial state, so that the game can be repeated.
-        :return: the initial state so that a new round begins.
         """
-        self.matched = set()
         self.deal_history = list()
         self.time = 0
-        self.done = dict((x, False) for x in self.agents['id'].tolist())
-        self._init_offers()
-        self.realized_deals = []
-        
-        self.action_space = Box(np.array([a['res_price'] for a in self.sellers] + [0.0] * self.n_buyers), 
-                                np.array([np.inf] * self.n_sellers + [a['res_price'] for a in self.buyers]))
-        
-        new_state = dict((agent_id, self.info_setting.get_state(agent_id=agent_id, deal_history=self.deal_history,
-                                                                agents=self.agents, offers=self.offers, matched=self.matched,
-                                                                current_time=self.time, max_time=self.max_steps,
-                                                                n_sellers=self.n_sellers, n_buyers=self.n_buyers,
-                                                                bool_dict=self.setting)) for agent_id in self.agents['id'])
-        return new_state
+        self.if_round_done = False
+        self.agents['done'] = False
+        self.agents['last_offer'] = 0.0
+        self.not_done_sellers = np.array([False] * self.n_sellers)
+        self.not_done_buyers = np.array([False] * self.n_buyers)
+        # These are current rewards in the round, not the cumulative rewards of agents
+        self.rewards = {agent_id: 0 for agent_id in self.agents['id']}
 
-    def _init_offers(self):
-        zero_actions = dict((agent_id, 0) for agent_id in self.agents['id'].unique())
-        self.offers = pd.merge(self.agents, pd.Series(zero_actions,
-                                                      name='offer').reset_index()
-                               .rename(columns={"index": "id"}), on='id')
-        self.offers['time'] = self.time
-        # display(self.offers)
+    def step(self, current_offers):
+        """
+        The step function takes the agents' new offers and simulates one time step in the market
+        :param current_offers: a dictionary containing the offer per agent
+        """
+        # self.deal_history and self.agents are also updated in match()
+        self.rewards = self.matcher.match(
+            current_offers=current_offers,
+            env_time=self.time,
+            agents=self.agents,
+            deal_history=self.deal_history
+        )
+        # observations = dict((agent_id, self.get_observation_state(agent_id=agent_id)) for agent_id in self.agents['id'])
+        self.time += 1
+
+        # Updating masks (arrays of booleans) for agents who are not done yet in this round
+        self.not_done_sellers = ~np.array(self.agents[self.agents['role'] == 'Seller']['done'])
+        self.not_done_buyers = ~np.array(self.agents[self.agents['role'] == 'Buyer']['done'])
+        not_done_agents = self.agents[~self.agents['done']]
+
+        # Checking if the round terminated
+        if (self.time == self.max_time) or \
+                not (True in list(self.not_done_buyers)) or not (True in list(self.not_done_sellers)) or \
+                not_done_agents[not_done_agents['role'] == 'Seller']['res_price'].min() > not_done_agents[not_done_agents['role'] == 'Buyer']['res_price'].max():
+            self.if_round_done = True
+            self.agents.loc[self.agents['done'] == False, 'previous_success'] = False
+            self.agents.loc[self.agents['done'] == True, 'previous_success'] = True
+
+        # Determining action space
+        # temp = self.agents[['role', 'res_price', 'done']]
+        # temp.loc[temp['done'] == True, 'res_price'] = -1
+        # temp.loc[temp['role'] == 'Buyer', 'res_price'] = 0
+        # low_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
+        # temp = self.agents[['role', 'res_price', 'done']]
+        # temp.loc[temp['done'] == True, 'res_price'] = -1
+        # temp.loc[temp['role'] == 'Seller', 'res_price'] = np.inf
+        # high_actions = list(temp[temp['role'] == 'Seller']['res_price']) + list(temp[temp['role'] == 'Buyer']['res_price'])
+        #
+        # self.action_space = Box(np.array(low_actions), np.array(high_actions))
 
     @abstractmethod
     def render(self, mode='human'):

@@ -6,6 +6,7 @@ __maintainer__ = "Thomas Asikis"
 
 import random
 import pandas as pd
+import numpy as np
 from abc import abstractmethod
 
 
@@ -18,25 +19,14 @@ class Matcher:
         pass
 
     @abstractmethod
-    def match(self,
-              current_actions: dict,
-              offers: pd.DataFrame,
-              env_time: int,
-              agents: pd.DataFrame,
-              matched: set,
-              done: dict,
-              deal_history: pd.DataFrame):
+    def match(self, current_offers: dict, env_time: int, agents: pd.DataFrame, deal_history: pd.DataFrame):
         """
         The matching method, which relies on several data structures passed from the market object.
-        :param current_actions: A dictionary of agent id and offer value
-        :param offers: The dataframe containing the past offers from agents
+        :param current_offers: A dictionary of agent id and offer value
         :param env_time: the current time step in the market
         :param agents: the dataframe containing the agent information
-        :param matched: the set containing all the ids of matched agents in this round
-        :param done: the dictionary with agent id as key and a boolean value to determine if an
-        agent has terminated the episode
         :param deal_history: the dictionary containing all the successful deals till now
-        :return: the dictionary containing the the agent id as keys and the rewards as values
+        :return: the dictionary containing the agents' ids as keys and the rewards as values
         """
         rewards: dict = None
         return rewards
@@ -58,72 +48,57 @@ class RandomMatcher(Matcher):
         super().__init__()
         self.reward_on_reference = reward_on_reference
 
-    def match(self,
-              current_actions: dict,
-              offers: pd.DataFrame,
-              env_time: int,
-              agents: pd.DataFrame,
-              matched: set,
-              done: dict,
-              deal_history: pd.DataFrame):
+    def match(self, current_offers: dict, env_time: int, agents: pd.DataFrame, deal_history: pd.DataFrame):
         """
         The matching method, which relies on several data structures passed from the market object.
-        :param current_actions: A dictionary of agent id and offer value
-        :param offers: The dataframe containing the past offers from agents
+        :param current_offers: A dictionary of agent id and offer value
         :param env_time: the current time step in the market
         :param agents: the dataframe containing the agent information
-        :param matched: the set containing all the ids of matched agents in this round
-        :param done: the dictionary with agent id as key and a boolean value to determine if an
-        agent has terminated the episode
         :param deal_history: the dictionary containing all the successful deals till now
-        :return: the dictionary containing the the agent id as keys and the rewards as values
+        :return: the dictionary containing the agents' ids as keys and the rewards as values
         """
-        # update offers
-        for agent_id, offer in current_actions.items():
-            if agent_id not in matched:
-                offers.loc[offers['id'] == agent_id, ['offer', 'time']] = (offer, env_time)
-        # keep buyer and seller offers with non-matched ids sorted:
+        # Update offers in environment class
+        for agent_id, offer in current_offers.items():
+            if not agents[agents['id'] == agent_id]['done'].iloc[0]:
+                agents.loc[agents['id'] == agent_id, 'last_offer'] = offer
+
+        # Keep buyer and seller offers with non-matched ids sorted:
         # descending by offer value for buyers
         # ascending by offer value for sellers
-        # and do a second sorting on ascending time to break ties for both
-        buyer_offers = offers[(offers['role'] == 'Buyer') &
-                              (~offers['id'].isin(matched))] \
-            .sort_values(['offer', 'time'], ascending=[False, True])
+        # and do a second sorting on ascending id to break ties for both
+        buyers_sorted = agents[(agents['role'] == 'Buyer') &
+                              (agents['done'] == False)].sort_values(['last_offer', 'id'], ascending=[False, True])
 
-        seller_offers = offers[(offers['role'] == 'Seller') &
-                               (~offers['id'].isin(matched))] \
-            .sort_values(['offer', 'time'], ascending=[True, True])
+        sellers_sorted = agents[(agents['role'] == 'Seller') &
+                               (agents['done'] == False)].sort_values(['last_offer', 'id'], ascending=[True, True])
 
-        min_len = min(seller_offers.shape[0], buyer_offers.shape[0])
-        rewards = dict((aid, 0) for aid in agents['id'].tolist())
+        min_len = min(sellers_sorted.shape[0], buyers_sorted.shape[0])
+        rewards = dict((a_id, 0) for a_id in agents['id'].tolist())
         for i in range(min_len):
-            considered_seller = seller_offers.iloc[i, :]
-            considered_buyer = buyer_offers.iloc[i, :]
-            if considered_buyer['offer'] >= considered_seller['offer']:
+            considered_seller = sellers_sorted.iloc[i, :]
+            considered_buyer = buyers_sorted.iloc[i, :]
+
+            if considered_buyer['last_offer'] >= considered_seller['last_offer']:
                 # if seller price is lower or equal to buyer price
                 # matching is performed
-                matched.add(considered_buyer['id'])
-                matched.add(considered_seller['id'])
+                agents.loc[agents['id'] == considered_buyer['id'], 'done'] = True
+                agents.loc[agents['id'] == considered_seller['id'], 'done'] = True
+                agents.loc[agents['id'] == considered_buyer['id'], 'stop_time'] = env_time
+                agents.loc[agents['id'] == considered_seller['id'], 'stop_time'] = env_time
 
-                # keeping both done and matched is redundant
-                done[considered_buyer['id']] = True
-                done[considered_seller['id']] = True
+                deal_price = random.uniform(considered_seller['last_offer'], considered_buyer['last_offer'])
 
-                deal_price = random.uniform(considered_seller['offer'], considered_buyer[
-                    'offer'])
                 if self.reward_on_reference:
-                    rewards[considered_buyer['id']] = considered_buyer['res_price'] -\
-                                                      considered_buyer['offer']
-                    rewards[considered_seller['id']] = considered_seller['offer'] - \
-                                                       considered_seller['res_price']
+                    rewards[considered_buyer['id']] = considered_buyer['res_price'] - considered_buyer['last_offer']
+                    rewards[considered_seller['id']] = considered_seller['last_offer'] - considered_seller['res_price']
                 else:
-                    rewards[considered_buyer['id']] = considered_buyer['offer'] - deal_price
-                    rewards[considered_seller['id']] = deal_price - considered_seller['offer']
-                matching = dict(Seller=considered_seller['id'], Buyer=considered_buyer['id'],
-                                time=env_time, deal_price=deal_price)
+                    rewards[considered_buyer['id']] = considered_buyer['res_price'] - deal_price
+                    rewards[considered_seller['id']] = deal_price - considered_seller['res_price']
+
+                matching = dict(Seller=considered_seller['id'], Buyer=considered_buyer['id'], time=env_time, deal_price=deal_price)
                 deal_history.append(matching)
+
             else:
                 # not possible that new matches can occur after this failure due to sorting.
                 break
-
         return rewards

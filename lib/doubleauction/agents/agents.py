@@ -19,16 +19,16 @@ class MarketAgent:
         """
         self.agent_id = agent_id
         self.reservation_price = reservation_price
-        self.coefs = np.array([])
+        self.coefs = None
         self.observations = {}
-        self.done = False
+        self.reward = 0.0
         
     @abstractmethod
-    def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+    def decide(self, *args, **kwargs):
         return -1
 
     @abstractmethod
-    def receive_observations_from_environment(self, observations):
+    def receive_observations_from_environment(self, env):
         return -1
 
 
@@ -43,7 +43,7 @@ class Buyer(MarketAgent):
         super().__init__(agent_id, reservation_price)
 
     @abstractmethod
-    def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+    def decide(self, *args, **kwargs):
         return -1
         
         
@@ -58,5 +58,5 @@ class Seller(MarketAgent):
         super().__init__(agent_id, reservation_price)
 
     @abstractmethod
-    def decide(self, observations, coefs=None, n_sellers=None, n_buyers=None, max_time=None):
+    def decide(self, *args, **kwargs):
         return -1

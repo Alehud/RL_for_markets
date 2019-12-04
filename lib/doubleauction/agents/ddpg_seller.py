@@ -1,4 +1,3 @@
-
 from .agents import Buyer, Seller
 import scipy.stats
 import numpy as np

@@ -1,7 +1,7 @@
 import numpy as np
 from doubleauction.environments import MarketEnvironment
 from doubleauction.matchers import RandomMatcher
-from doubleauction.agents.linear_generic_agent import LinearGenericBuyer, LinearGenericSeller
+from doubleauction.agents.linear_sameside_agent import LinearSameSideBuyer, LinearSameSideSeller
 import matplotlib.pyplot as plt
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
@@ -10,31 +10,16 @@ warnings.simplefilter("ignore")
 
 # Define the initial number of agents
 n_sellers = 5
-n_buyers = 5
+n_buyers = 3
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
-setting = {
-    'self_last_offer': True,
-    'same_side_last_offers': True,
-    'same_side_res_prices': True,
-    'same_side_not_done': True,
-    'other_side_last_offers': True,
-    'other_side_res_prices': True,
-    'other_side_not_done': True,
-    'completed_deals': True,
-    'current_time': True,
-    'max_time': True,
-    'n_sellers': True,
-    'n_buyers': True,
-    'previous_success': True
-}
 res_prices = np.random.normal(100, 5, n_sellers)
 names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
-sellers = np.array([LinearGenericSeller(agent_id=names[i], reservation_price=res_prices[i], setting=setting) for i in range(n_sellers)])
+sellers = np.array([LinearSameSideSeller(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_sellers)])
 res_prices = np.random.normal(200, 5, n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
-buyers = np.array([LinearGenericBuyer(agent_id=names[i], reservation_price=res_prices[i], setting=setting) for i in range(n_buyers)])
+buyers = np.array([LinearSameSideBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
 
 
 # For plotting
@@ -47,17 +32,17 @@ for g in range(1):
 
     # Define parameters of each round
     max_time = 30
-    matcher = RandomMatcher(reward_on_reference=True)
+    matcher = RandomMatcher(reward_on_reference=False)
 
     # Create market environment
     market_env = MarketEnvironment(sellers=sellers, buyers=buyers, max_time=max_time, matcher=matcher)
 
     # HERE AGENTS LEARN AND ADJUST THEIR COEFS (for now the are constant)
     for agent in sellers:
-        size_coefs = agent.determine_size_of_coefs(n_buyers=n_buyers, n_sellers=n_sellers)
+        size_coefs = agent.determine_size_of_coefs(n_sellers=n_sellers)
         agent.coefs = np.array([0.05, 0.95] + [0]*(size_coefs - 2))
     for agent in buyers:
-        size_coefs = agent.determine_size_of_coefs(n_buyers=n_buyers, n_sellers=n_sellers)
+        size_coefs = agent.determine_size_of_coefs(n_buyers=n_buyers)
         agent.coefs = np.array([0.05, 0.95] + [0]*(size_coefs - 2))
 
     # Reset agents' rewards and observations
@@ -69,7 +54,7 @@ for g in range(1):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(1):
+    for r in range(2):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -97,6 +82,7 @@ for g in range(1):
                 agent.receive_observations_from_environment(market_env)
 
             print(sellers[0].observations)
+            print(sellers[0].reward)
 
             # Clearing current offers
             current_offers.clear()
