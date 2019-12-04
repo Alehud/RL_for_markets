@@ -13,7 +13,11 @@ class RandomBuyer(Buyer):
         
     def decide(self, observations):
         demand = scipy.stats.halflogistic(-7.692926601910835e-08, 31.41266555783104).rvs()
-        return np.abs(self.reservation_price - demand)
+        
+        if self.reservation_price - demand < 0:
+            demand = np.random.rand()*self.reservation_price
+        
+        return max(0, self.reservation_price - demand)
 
     def receive_observations_from_environment(self, observations):
         self.observations['self_last_offer'] = observations['self_last_offer']
