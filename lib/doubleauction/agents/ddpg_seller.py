@@ -1,9 +1,10 @@
 from .agents import Buyer, Seller
 import scipy.stats
 import numpy as np
-from ..models import Actor
+from ..models import Actor, Critic
 from doubleauction.util import SequentialMemory, hard_update, soft_update
 import torch
+import torch.nn as nn
         
 import scipy.stats
 import numpy as np
@@ -79,7 +80,7 @@ class DDPGSeller(Seller):
         self.round_first = True
         
         
-    def decide(self, observations):
+    def decide(self):
         
         ## update state
         self.state = np.array([self.last_demand, self.last_successful,
@@ -112,9 +113,13 @@ class DDPGSeller(Seller):
         return self.reservation_price + a
   
 
-    def observe(self, reward, done):
+    def receive_observations_from_environment(self, env):
+        info = env.agents[env.agents['id'] == self.agent_id]
+        self.last_successful = info['previous_success'].iloc[0]
+        
+
+    def memorize(self, reward, done):
         self.memory.append(self.state, self.action, reward, done)
-        self.last_successful = (reward > 0)
 
         
     def learn(self):
