@@ -71,7 +71,7 @@ rewards = []
 epochs = 700
 warmup_epochs = 20
 seller_agent = DDPGSellerOU('learner', 0, 
-                                ou_theta=.7, ou_mu=.0, ou_sigma=15., sigma_min=3.5, anneal_steps=300*10*10,
+                                ou_theta=.7, ou_mu=.0, ou_sigma=15., sigma_min=6.0, anneal_steps=300*10*10,
                                   discount = 0.97, lr = 3e-4, 
                                   wd = 1e-4, mem_size=500000, tau=5e-3)
 
@@ -193,7 +193,7 @@ for e in range(epochs):
         torch.save({'actor':seller_agent.actor.state_dict(),
                    'actor_target':seller_agent.actor_target.state_dict(),
                   'critic':seller_agent.critic.state_dict(),
-                  'critic_target':seller_agent.critic_target.state_dict()}, 'results/models_ou1_e{}'.format(e))
+                  'critic_target':seller_agent.critic_target.state_dict()}, 'results/models_ou2_e{}'.format(e))
 
 
 # In[11]:
@@ -212,16 +212,16 @@ plt.plot(l3)
 # In[12]:
 
 
-torch.save(records, 'results/records_ou1')
+torch.save(records, 'results/records_ou2')
 
 torch.save({'actor':seller_agent.actor.state_dict(),
            'actor_target':seller_agent.actor_target.state_dict(),
           'critic':seller_agent.critic.state_dict(),
-          'critic_target':seller_agent.critic_target.state_dict()}, 'results/models_ou1')
+          'critic_target':seller_agent.critic_target.state_dict()}, 'results/models_ou2')
 
 
 # In[13]:
 
 
-torch.save(seller_agent.memory, 'results/memory_ou1')
+torch.save(seller_agent.memory, 'results/memory_ou2')
 
