@@ -2,7 +2,8 @@ from .agents import Buyer, Seller
 import scipy.stats
 import numpy as np
 from ..models import Actor, Critic
-from doubleauction.util import SequentialMemory, hard_update, soft_update
+from ..util import SequentialMemory, hard_update, soft_update
+from ..util import OrnsteinUhlenbeckProcess
 import torch
 import torch.nn as nn
         
@@ -11,9 +12,9 @@ import numpy as np
 from doubleauction.agents import Buyer, Seller
 import torch
         
-class DDPGSeller(Seller):
+class DDPGSellerOU(Seller):
     def __init__(self, agent_id: str,  reservation_price: float, *,
-                    max_noise=50., anneal_steps=1e4, min_noise=5.,
+                    ou_theta=.7, ou_mu=.0, ou_sigma=15., sigma_min=3.5, anneal_steps=300*10*10,
                     batch_size = 64, mem_size=100000, lr=1e-2, width_actor=64, width_critic=64,
                     tau=1e-2, discount=0.98, wd = 1e-4):
         """
@@ -23,11 +24,13 @@ class DDPGSeller(Seller):
         willing to sell
         """
         super().__init__(agent_id, reservation_price)
-        self.max_noise = max_noise
-        self.anneal_steps = anneal_steps
-        self.min_noise = min_noise
+#         self.max_noise = max_noise
+#         self.anneal_steps = anneal_steps
+#         self.min_noise = min_noise
         
-        self.sigma = max_noise
+        self.noise_process = OrnsteinUhlenbeckProcess(size=1, theta=ou_theta, mu=ou_mu, sigma=ou_sigma)
+        
+#         self.sigma = max_noise
         
         self.actor = Actor(5, 1, hidden1=width_actor, hidden2=width_actor)
         self.actor_target = Actor(5, 1, hidden1=width_actor, hidden2=width_actor)
@@ -70,9 +73,9 @@ class DDPGSeller(Seller):
         
         self.new_round()
         
-        if not self.eval:
-            self.sigma = self.max_noise - self.game_count * (self.max_noise - self.min_noise) / self.anneal_steps
-            self.sigma = max(self.min_noise, self.sigma)
+#         if not self.eval:
+#             self.sigma = self.max_noise - self.game_count * (self.max_noise - self.min_noise) / self.anneal_steps
+#             self.sigma = max(self.min_noise, self.sigma)
             
         self.game_count += 1
         
@@ -83,9 +86,9 @@ class DDPGSeller(Seller):
     def decide(self):
         
         ## update state
-        self.state = np.array([self.last_demand, self.last_successful,
+        self.state = np.array([self.last_demand / 50., self.last_successful,
                                self.game_first, self.round_first,
-                               self.reservation_price], dtype=np.float)
+                               self.reservation_price / 200.], dtype=np.float)
         s = torch.tensor(self.state).float().unsqueeze(0)
 
         with torch.no_grad():
@@ -95,7 +98,7 @@ class DDPGSeller(Seller):
                 a = a.item()
             else:
                 
-                n = np.random.normal(0, self.sigma)
+                n = self.noise_process.sample()
                 d = self.actor(s).item()
                 a = d + n
 
