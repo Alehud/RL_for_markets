@@ -1,71 +1,25 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import torch
-import doubleauction
-
-
-# In[2]:
-
-
 from doubleauction.util import OrnsteinUhlenbeckProcess
-
-
-# In[3]:
-
-
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+from doubleauction.agents import RandomSeller, RandomBuyer, DDPGSellerOU
+from doubleauction.environments import MarketEnvironment
+from doubleauction.matchers import RandomMatcher
+from doubleauction.util import generate_seller_prices_paper, generate_buyer_prices_paper
+
 theta = 0.7
 sigma = 15.
 p = OrnsteinUhlenbeckProcess(theta=theta, sigma = sigma)
-sigma * sigma / 2 / theta
-
-
-# In[4]:
-
-
 l = []
 for i in range(100):
     l.append(p.sample())
     
 plt.plot(l)
 
-
-# # Create environment
-
-# In[5]:
-
-
-import matplotlib.pyplot as plt
-
-
-# In[6]:
-
-
-import doubleauction
-from doubleauction.agents import RandomSeller, RandomBuyer, DDPGSellerOU
-from doubleauction.environments import MarketEnvironment
-
-from doubleauction.matchers import RandomMatcher
-
-from doubleauction.util import SequentialMemory, hard_update, soft_update
-from doubleauction.util import generate_seller_prices_paper, generate_buyer_prices_paper
-
-
-# In[7]:
-
-
 records = {}
 records['rewards'] = []
 records['demands'] = []
 records['prices'] = []
-
-
-# In[8]:
-
 
 rewards = []
 epochs = 700
@@ -75,11 +29,7 @@ seller_agent = DDPGSellerOU('learner', 0,
                                   discount = 0.97, lr = 3e-4, 
                                   wd = 1e-4, mem_size=500000, tau=5e-3)
 
-
-# # Run the training algorithm
-
-# In[9]:
-
+# Run the training algorithm
 
 mdict = torch.load('results/models2')
 seller_agent.actor.load_state_dict(mdict['actor'])
@@ -87,9 +37,6 @@ seller_agent.actor_target.load_state_dict(mdict['actor_target'])
 
 seller_agent.critic.load_state_dict(mdict['critic'])
 seller_agent.critic_target.load_state_dict(mdict['critic_target'])
-
-
-# In[10]:
 
 for e in range(epochs):
     seller_agent.reservation_price = generate_seller_prices_paper(1)[0]
