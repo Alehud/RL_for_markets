@@ -4,14 +4,18 @@ from doubleauction.matchers import RandomMatcher
 from doubleauction.util import generate_buyer_prices_paper, generate_seller_prices_paper
 from doubleauction.agents.linear_blackbox_agent import LinearBlackBoxBuyer, LinearBlackBoxSeller
 import matplotlib.pyplot as plt
+import time
 import warnings
 # pandas setting warnings can be ignored, as it is intendend often
 warnings.simplefilter("ignore")
 
+start = time.time()
 
 # Define the initial number of agents
-n_sellers = 5
-n_buyers = 5
+n_sellers = 100
+n_buyers = 100
+rewards = np.zeros((100, 30))
+
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -24,8 +28,8 @@ buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_
 
 
 # For plotting
-fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
-ax.set_xlim(75, 150)
+# fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
+# ax.set_xlim(75, 150)
 
 # Loop over games
 for g in range(1):
@@ -53,7 +57,7 @@ for g in range(1):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(2):
+    for r in range(3):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -69,11 +73,11 @@ for g in range(1):
         # Loop over time steps
         i = 0
         while market_env.if_round_done is False:
-            print(i, '-------')
+            # print(i, '-------')
             i += 1
             # Environment calculates what happens
             market_env.step(current_offers)
-            print(market_env.agents)
+            # print(market_env.agents)
 
             # All agents receive observations from what environment generated
             for agent in sellers:
@@ -92,8 +96,13 @@ for g in range(1):
                 new_offer = agent.decide()
                 current_offers[agent.agent_id] = new_offer
 
+    # for i in range(100):
+    #     rewards[i][g] = sellers[i].reward
             # for plotting
-            _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
-            plt.draw()
-            plt.pause(0.1)
-            _ = [b.remove() for b in bars0]
+            # _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
+            # plt.draw()
+            # plt.pause(0.1)
+            # _ = [b.remove() for b in bars0]
+# print(rewards)
+
+print(time.time() - start)
