@@ -1,12 +1,11 @@
-__author__ = "Thomas Asikis"
-__credits__ = ["Copyright (c) 2019 Thomas Asikis"]
+__author__ = "Thomas Asikis, Batuhan Yardim, Aleksei Khudorozhkov, Ka Rin Sim, Neri Passaleva"
+__credits__ = ["Copyright (c) 2019 Thomas Asikis, Batuhan Yardim, Aleksei Khudorozhkov, Ka Rin Sim, Neri Passaleva"]
 __license__ = "MIT"
-__version__ = "0.1"
-__maintainer__ = "Thomas Asikis"
+__version__ = "0.2"
+__maintainer__ = "Thomas Asikis, Batuhan Yardim, Aleksei Khudorozhkov, Ka Rin Sim, Neri Passaleva"
 
 import random
 import pandas as pd
-import numpy as np
 from abc import abstractmethod
 
 
@@ -37,13 +36,11 @@ class RandomMatcher(Matcher):
         """
         A random matcher, which decides the deal price of a matched pair by sampling a uniform
         distribution bounded in [seller_ask, buyer_bid] range.
-        The reward is calculated as the difference from cost or the difference to budget for
+        The reward is calculated as the difference from production cost or the difference to budget for
         sellers and buyers.
         :param reward_on_reference: The parameter to use a different reward calculation.
-        If set to true the reward now becomes: offer - reservation price for, sellers
+        If set to true the reward now becomes: offer - reservation price, for sellers
         and: reservation price - offer, for buyers.
-        You may chose to use this reward scheme, but you have to justify why it is better than
-        the old!
         """
         super().__init__()
         self.reward_on_reference = reward_on_reference
@@ -63,8 +60,7 @@ class RandomMatcher(Matcher):
                 agents.loc[agents['id'] == agent_id, 'last_offer'] = offer
 
         # Keep buyer and seller offers with non-matched ids sorted:
-        # descending by offer value for buyers
-        # ascending by offer value for sellers
+        # descending by offer value for buyers, ascending by offer value for sellers
         # and do a second sorting on ascending id to break ties for both
         buyers_sorted = agents[(agents['role'] == 'Buyer') &
                               (agents['done'] == False)].sort_values(['last_offer', 'id'], ascending=[False, True])

@@ -6,7 +6,14 @@ from abc import abstractmethod
 class LinearSameSideAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        Linear generic agent
+        Linear sameside agent. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He knows:
+        'self_last_offer': previous offer of the agent
+        'same_side_last_offers': previous offers of all agents of the same side (buyers/sellers)
+        'same_side_not_done': how many agents of the same side hasn't yet made a deal in current round
+        'current_time': current time in the round
+        'max_time': time at which the round terminates no matter what
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
         self.observations['previous_success'] = False
@@ -39,11 +46,21 @@ class LinearSameSideAgent(MarketAgent):
 class LinearSameSideBuyer(LinearSameSideAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        A buyer who takes determines the new offer as a linear combination of all data available in observation
+        Linear sameside buyer. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He knows:
+        'self_last_offer': previous offer of the agent
+        'same_side_last_offers': previous offers of all agents of the same side (buyers/sellers)
+        'same_side_not_done': how many agents of the same side hasn't yet made a deal in current round
+        'current_time': current time in the round
+        'max_time': time at which the round terminates no matter what
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
 
     def compose_observation_vector(self, n_buyers: int):
+        """
+        Function which returns an array consisting of all available observations
+        """
         vals = np.array([self.reservation_price])
         vals = np.append(vals, self.observations['self_last_offer'])
         same_side_ofs = np.sort(self.observations['same_side_last_offers'])[::-1]
@@ -63,7 +80,10 @@ class LinearSameSideBuyer(LinearSameSideAgent):
             return new_offer
 
     def determine_size_of_coefs(self, n_buyers: int):
-        # Reservation price is always known to agent
+        """
+        Function which determines the size of an array of coefs needed for this agent with the current setting.
+        """
+        # res_price, self_last_offer, same_side_not_done, current_time, previous_success + n_buyers for same_side_last_offers
         size = 5 + n_buyers
         return int(size)
 
@@ -71,11 +91,21 @@ class LinearSameSideBuyer(LinearSameSideAgent):
 class LinearSameSideSeller(LinearSameSideAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        A seller who takes determines the new offer as a linear combination of all data available in observation
+        Linear sameside seller. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He knows:
+        'self_last_offer': previous offer of the agent
+        'same_side_last_offers': previous offers of all agents of the same side (buyers/sellers)
+        'same_side_not_done': how many agents of the same side hasn't yet made a deal in current round
+        'current_time': current time in the round
+        'max_time': time at which the round terminates no matter what
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
 
     def compose_observation_vector(self, n_sellers: int):
+        """
+        Function which returns an array consisting of all available observations
+        """
         vals = np.array([self.reservation_price])
         vals = np.append(vals, self.observations['self_last_offer'])
         same_side_ofs = np.sort(self.observations['same_side_last_offers'])[::-1]
@@ -95,6 +125,9 @@ class LinearSameSideSeller(LinearSameSideAgent):
             return new_offer
 
     def determine_size_of_coefs(self, n_sellers: int):
-        # Reservation price is always known to agent
+        """
+        Function which determines the size of an array of coefs needed for this agent with the current setting.
+        """
+        # res_price, self_last_offer, same_side_not_done, current_time, previous_success + n_buyers for same_side_last_offers
         size = 5 + n_sellers
         return int(size)
