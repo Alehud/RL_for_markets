@@ -11,9 +11,11 @@ import time
 start = time.time()
 
 
-# Define the initial number of agents
-n_sellers = 250
-n_buyers = 250
+# Define the initial number of agents, the number of rounds and games
+n_sellers = 100
+n_buyers = 100
+n_game = 1
+n_round = 10
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -30,7 +32,7 @@ buyers = np.array([RandomBuyer(agent_id=names[i], reservation_price=res_prices[i
 # ax.set_xlim(95, 205)
 
 # Loop over games
-for g in range(1):
+for g in range(n_game):
     print("GAME", g, '=================================================================================================================')
 
     # Define parameters of each round
@@ -51,7 +53,7 @@ for g in range(1):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(10):
+    for r in range(n_round):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment

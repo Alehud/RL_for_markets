@@ -11,20 +11,21 @@ warnings.simplefilter("ignore")
 
 start = time.time()
 
-# Define the initial number of agents
+# Define the initial number of agents, the number of rounds and games
 n_sellers = 100
 n_buyers = 100
-rewards = np.zeros((100, 30))
+n_game = 1
+n_round = 10
 
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
 res_prices = generate_seller_prices_paper(discrete=False, count=n_sellers)
 names = ['Seller ' + str(i) for i in range(1, n_sellers + 1)]
-sellers = np.array([LinearBlackBoxSeller(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_sellers)])
+sellers = np.array([LinearBlackBoxSeller(agent_id=names[i], reservation_price=res_prices[i], noisy=True) for i in range(n_sellers)])
 res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
-buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
+buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i], noisy=True) for i in range(n_buyers)])
 
 
 # For plotting
@@ -73,7 +74,7 @@ for g in range(1):
         # Loop over time steps
         i = 0
         while market_env.if_round_done is False:
-            # print(i, '-------')
+            print(i, '-------')
             i += 1
             # Environment calculates what happens
             market_env.step(current_offers)
@@ -95,14 +96,5 @@ for g in range(1):
             for agent in buyers[market_env.not_done_buyers]:
                 new_offer = agent.decide()
                 current_offers[agent.agent_id] = new_offer
-
-    # for i in range(100):
-    #     rewards[i][g] = sellers[i].reward
-            # for plotting
-            # _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
-            # plt.draw()
-            # plt.pause(0.1)
-            # _ = [b.remove() for b in bars0]
-# print(rewards)
 
 print(time.time() - start)

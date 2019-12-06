@@ -1,5 +1,6 @@
 from doubleauction.agents import MarketAgent
 import numpy as np
+import scipy
 from abc import abstractmethod
 
 
@@ -66,8 +67,7 @@ class NonlinearBlackBoxBuyer(NonlinearBlackBoxAgent):
                 demand = np.random.rand()*self.reservation_price
 
             return max(0, self.reservation_price - demand)
-        
-        
+
         if self.observations['previous_success']:
             new_offer = self.coefs[0]*self.reservation_price + self.coefs[1]*self.observations['self_last_offer']
         else:

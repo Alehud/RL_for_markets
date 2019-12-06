@@ -8,9 +8,11 @@ import warnings
 warnings.simplefilter("ignore")
 
 
-# Define the initial number of agents
-n_sellers = 5
-n_buyers = 3
+# Define the initial number of agents, the number of rounds and games
+n_sellers = 20
+n_buyers = 20
+n_game = 1
+n_round = 10
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -23,11 +25,11 @@ buyers = np.array([LinearSameSideBuyer(agent_id=names[i], reservation_price=res_
 
 
 # For plotting
-# fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
-# ax.set_xlim(95, 205)
+fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
+ax.set_xlim(95, 205)
 
 # Loop over games
-for g in range(1):
+for g in range(n_game):
     print("GAME", g, '=================================================================================================================')
 
     # Define parameters of each round
@@ -54,7 +56,7 @@ for g in range(1):
         agent.observations = {}
 
     # Loop over rounds
-    for r in range(2):
+    for r in range(n_round):
         print("ROUND", r, '-----------------------------------------------')
 
         # Reset market environment
@@ -81,8 +83,8 @@ for g in range(1):
             for agent in buyers:
                 agent.receive_observations_from_environment(market_env)
 
-            print(sellers[0].observations)
-            print(sellers[0].reward)
+            # print(sellers[0].observations)
+            # print(sellers[0].reward)
 
             # Clearing current offers
             current_offers.clear()
@@ -96,7 +98,7 @@ for g in range(1):
                 current_offers[agent.agent_id] = new_offer
 
             # for plotting
-            # _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
-            # plt.draw()
-            # plt.pause(0.1)
-            # _ = [b.remove() for b in bars0]
+            _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
+            plt.draw()
+            plt.pause(0.1)
+            _ = [b.remove() for b in bars0]

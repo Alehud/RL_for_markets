@@ -1,8 +1,8 @@
 from doubleauction.agents import MarketAgent
 import numpy as np
 from abc import abstractmethod
-
 import scipy.stats
+
 
 class LinearBlackBoxAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float):
@@ -53,7 +53,6 @@ class LinearBlackBoxBuyer(LinearBlackBoxAgent):
         
         self.noisy = noisy
         self.coeffs = np.array([ 0.75497335, 13.1468725 ])
-        
 
     def compose_observation_vector(self):
         vals = np.array([self.reservation_price - self.observations['self_last_offer'], 

@@ -52,8 +52,8 @@ class MarketEnvironment(Env):
         self.if_round_done = False
         self.agents['done'] = False
 #         self.agents['last_offer'] = 0.0
-        self.not_done_sellers = np.array([False] * self.n_sellers)
-        self.not_done_buyers = np.array([False] * self.n_buyers)
+        self.not_done_sellers = np.array([True] * self.n_sellers)
+        self.not_done_buyers = np.array([True] * self.n_buyers)
         # These are current rewards in the round, not the cumulative rewards of agents
         self.rewards = {agent_id: 0 for agent_id in self.agents['id']}
         

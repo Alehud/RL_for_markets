@@ -11,12 +11,11 @@ warnings.simplefilter("ignore")
 my_path = os.getcwd()
 
 
-# Define the initial number of agents
-n_sellers = 100
-n_buyers = 100
-n_game = 30
-n_round = 20
-num = 10
+# Define the initial number of agents, the number of rounds and games
+n_sellers = 50
+n_buyers = 50
+n_game = 1
+n_round = 5
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -27,18 +26,18 @@ res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
 buyers = np.array([NonlinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
 
+# buyers[0].reservation_price = 150
 
-# For plotting
-# fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
-# ax.set_xlim(75, 150)
-
-rewards_buyers = np.zeros((num, n_game))
-rewards_sellers = np.zeros((num, n_game))
-print(rewards_buyers)
+# rewards_buyers = np.zeros((n_buyers, n_game))
+# rewards_sellers = np.zeros((n_sellers, n_game))
 
 aggro_array = np.array([0.0, 0.1, 0.2, 0.3, 0.4])
 for aggro in aggro_array:
     print("AGGRO", aggro, '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    rewards_buyers = np.zeros(n_buyers)
+    rewards_sellers = np.zeros(n_sellers)
+    demands_agents = np.array([])
+    demand_aggro = np.array([])
     # Loop over games
     for g in range(n_game):
         print("GAME", g, '=================================================================================================================')
@@ -52,9 +51,10 @@ for aggro in aggro_array:
 
         # HERE AGENTS LEARN AND ADJUST THEIR COEFS (for now the are constant)
         for agent in sellers:
-            agent.coefs = np.array([1-0.75497335, 0.75497335, aggro])
+            agent.coefs = np.array([1-0.75497335, 0.75497335, 0])
         for agent in buyers:
-            agent.coefs = np.array([1-0.75497335, 0.75497335, aggro])
+            agent.coefs = np.array([1-0.75497335, 0.75497335, 0])
+        buyers[0].coefs = np.array([1-0.75497335, 0.75497335, aggro])
 
         # Reset agents' rewards and observations
         for agent in sellers:
@@ -81,8 +81,23 @@ for aggro in aggro_array:
             # Loop over time steps
             i = 0
             while market_env.if_round_done is False:
-                # print(i, '-------')
+                print(i, '-------')
                 i += 1
+
+                # print(current_offers)
+                # print(market_env.not_done_sellers)
+                # print(market_env.not_done_buyers)
+                demand = 0
+                for agent in sellers[market_env.not_done_sellers]:
+                    demand += current_offers[agent.agent_id] - agent.reservation_price
+                for agent in buyers[market_env.not_done_buyers][1:]:
+                    demand += agent.reservation_price - current_offers[agent.agent_id]
+                demands_agents = np.append(demands_agents, demand / (n_sellers + n_buyers - 1))
+                if market_env.not_done_buyers[0]:
+                    demand_aggro = np.append(demand_aggro, buyers[0].reservation_price - current_offers[buyers[0].agent_id])
+                else:
+                    demand_aggro = np.append(demand_aggro, -99)
+
                 # Environment calculates what happens
                 market_env.step(current_offers)
                 # print(market_env.agents)
@@ -104,21 +119,14 @@ for aggro in aggro_array:
                     new_offer = agent.decide()
                     current_offers[agent.agent_id] = new_offer
 
-        for i in range(num):
-            rewards_sellers[i][g] = sellers[i].reward
-            rewards_buyers[i][g] = buyers[i].reward
-                # for plotting
-                # _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
-                # plt.draw()
-                # plt.pause(0.1)
-                # _ = [b.remove() for b in bars0]
+        for i in range(n_sellers):
+            rewards_sellers[i] = sellers[i].reward
+        for i in range(n_buyers):
+            rewards_buyers[i] = buyers[i].reward
 
-    for n in range(num):
-        reward_buyers_per_game = rewards_buyers[n]
-        reward_sellers_per_game = rewards_sellers[n]
-        sellerfname = 'nonlinear_blackbox_agent_reward_aggro_' + str(aggro) + '_seller_' + str(n) + '.txt'
-        buyerfname = 'nonlinear_blackbox_agent_reward_aggro_' + str(aggro) + '_buyer_' + str(n) + '.txt'
-        filename_s = os.path.join(my_path, sellerfname)
-        filename_b = os.path.join(my_path, buyerfname)
-        np.savetxt(filename_s, reward_sellers_per_game)
-        np.savetxt(filename_b, reward_buyers_per_game)
+    np.save('rewards_buyers_aggro' + str(aggro) + '.npy', rewards_buyers)
+    np.save('rewards_sellers_aggro' + str(aggro) + '.npy', rewards_sellers)
+    np.save('demands_agents_aggro' + str(aggro) + '.npy', demands_agents)
+    np.save('demands_aggro_aggro' + str(aggro) + '.npy', demand_aggro)
+
+
