@@ -10,6 +10,13 @@ class NonlinearBlackBoxAgent(MarketAgent):
         """
         super().__init__(agent_id, reservation_price)
         self.observations['previous_success'] = False
+        self.first_ever_bid = True
+        
+    def new_game(self):
+        self.first_ever_bid = True
+        
+    def new_round(self):
+        pass
 
     def receive_observations_from_environment(self, env):
         agents = env.agents
@@ -37,6 +44,18 @@ class NonlinearBlackBoxBuyer(NonlinearBlackBoxAgent):
         super().__init__(agent_id, reservation_price)
 
     def decide(self):
+        
+        if self.first_ever_bid:
+            self.first_ever_bid = False
+            
+            demand = scipy.stats.halflogistic(-7.692926601910835e-08, 31.41266555783104).rvs()
+        
+            if self.reservation_price - demand < 0:
+                demand = np.random.rand()*self.reservation_price
+
+            return max(0, self.reservation_price - demand)
+        
+        
         if self.observations['previous_success']:
             new_offer = self.coefs[0]*self.reservation_price + self.coefs[1]*self.observations['self_last_offer']
         else:
@@ -55,6 +74,17 @@ class NonlinearBlackBoxSeller(NonlinearBlackBoxAgent):
         super().__init__(agent_id, reservation_price)
 
     def decide(self):
+        
+        if self.first_ever_bid:
+            self.first_ever_bid = False
+            
+            demand = scipy.stats.expon(0.0, 33.327542829759196).rvs()
+            new_offer = self.reservation_price + demand
+            if new_offer < self.reservation_price:
+                return self.reservation_price
+            else:
+                return new_offer
+        
         if self.observations['previous_success']:
             new_offer = self.coefs[0]*self.reservation_price + self.coefs[1]*self.observations['self_last_offer']
         else:

@@ -39,6 +39,8 @@ class MarketEnvironment(Env):
             np.concatenate((np.array([np.infty] * self.n_sellers, dtype=np.float32), np.array(buyers_res_prices, dtype=np.float32)))
         )
         self.reset()
+        
+        
 
     def reset(self):
         """
@@ -48,17 +50,27 @@ class MarketEnvironment(Env):
         self.time = 0
         self.if_round_done = False
         self.agents['done'] = False
-        self.agents['last_offer'] = 0.0
+#         self.agents['last_offer'] = 0.0
         self.not_done_sellers = np.array([False] * self.n_sellers)
         self.not_done_buyers = np.array([False] * self.n_buyers)
         # These are current rewards in the round, not the cumulative rewards of agents
         self.rewards = {agent_id: 0 for agent_id in self.agents['id']}
+        
+        self.first_in_round = True
 
     def step(self, current_offers):
         """
         The step function takes the agents' new offers and simulates one time step in the market
         :param current_offers: a dictionary containing the offer per agent
         """
+        
+        if self.first_in_round:
+            self.first_in_round = False
+            
+            self.agents['previous_success'] = False
+            
+#             print(self.agents['previous_success'])
+        
         # self.deal_history and self.agents are also updated in match()
         self.rewards = self.matcher.match(
             current_offers=current_offers,
