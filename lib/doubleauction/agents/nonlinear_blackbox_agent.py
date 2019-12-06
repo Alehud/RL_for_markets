@@ -2,6 +2,7 @@ from doubleauction.agents import MarketAgent
 import numpy as np
 from abc import abstractmethod
 
+import scipy.stats
 
 class NonlinearBlackBoxAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float):
@@ -17,6 +18,8 @@ class NonlinearBlackBoxAgent(MarketAgent):
         super().__init__(agent_id, reservation_price)
         self.observations['previous_success'] = False
         self.first_ever_bid = True
+        
+        self.coefs = np.array([ -0.01, 1.01, 0.4 ])
         
     def new_game(self):
         self.first_ever_bid = True
@@ -54,6 +57,8 @@ class NonlinearBlackBoxBuyer(NonlinearBlackBoxAgent):
         'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
+        
+        self.coefs = np.array([ -0.01, 1.01, 0.4 ])
 
     def decide(self):
         
@@ -90,6 +95,8 @@ class NonlinearBlackBoxSeller(NonlinearBlackBoxAgent):
         'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
+        
+        self.coefs = np.array([ -0.05, 1.05, 0.4 ])
 
     def decide(self):
         

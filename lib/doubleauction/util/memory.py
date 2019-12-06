@@ -5,6 +5,7 @@ import random
 
 import numpy as np
 
+# This piece of code has been adapted from the Keras-RL library
 # [reference] https://github.com/matthiasplappert/keras-rl/blob/master/rl/memory.py
 
 # This is to be understood as a transition: Given `state0`, performing `action`
