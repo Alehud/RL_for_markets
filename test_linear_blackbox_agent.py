@@ -29,8 +29,8 @@ buyers = np.array([LinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_
 
 
 # For plotting
-# fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
-# ax.set_xlim(75, 150)
+fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
+ax.set_xlim(75, 150)
 
 # Loop over games
 for g in range(1):
@@ -96,5 +96,11 @@ for g in range(1):
             for agent in buyers[market_env.not_done_buyers]:
                 new_offer = agent.decide()
                 current_offers[agent.agent_id] = new_offer
+
+            # for plotting
+            _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
+            plt.draw()
+            plt.pause(0.1)
+            _ = [b.remove() for b in bars0]
 
 print(time.time() - start)

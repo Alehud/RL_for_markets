@@ -26,7 +26,7 @@ res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
 buyers = np.array([NonlinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
 
-# buyers[0].reservation_price = 150
+buyers[0].reservation_price = 125
 
 # rewards_buyers = np.zeros((n_buyers, n_game))
 # rewards_sellers = np.zeros((n_sellers, n_game))
@@ -124,9 +124,9 @@ for aggro in aggro_array:
         for i in range(n_buyers):
             rewards_buyers[i] = buyers[i].reward
 
-    np.save('rewards_buyers_aggro' + str(aggro) + '.npy', rewards_buyers)
-    np.save('rewards_sellers_aggro' + str(aggro) + '.npy', rewards_sellers)
-    np.save('demands_agents_aggro' + str(aggro) + '.npy', demands_agents)
-    np.save('demands_aggro_aggro' + str(aggro) + '.npy', demand_aggro)
+    np.save('results/aggressive agent/rewards_buyers_aggro' + str(aggro) + '.npy', rewards_buyers)
+    np.save('results/aggressive agent/rewards_sellers_aggro' + str(aggro) + '.npy', rewards_sellers)
+    np.save('results/aggressive agent/demands_agents_aggro' + str(aggro) + '.npy', demands_agents)
+    np.save('results/aggressive agent/demands_aggro_aggro' + str(aggro) + '.npy', demand_aggro)
 
 

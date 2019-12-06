@@ -1,13 +1,12 @@
-
-    
-    
-import numpy as np 
+import numpy as np
 
 # [reference] https://github.com/matthiasplappert/keras-rl/blob/master/rl/random.py
+
 
 class RandomProcess(object):
     def reset_states(self):
         pass
+
 
 class AnnealedGaussianProcess(RandomProcess):
     def __init__(self, mu, sigma, sigma_min, n_steps_annealing):

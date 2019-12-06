@@ -9,10 +9,10 @@ warnings.simplefilter("ignore")
 
 
 # Define the initial number of agents, the number of rounds and games
-n_sellers = 20
-n_buyers = 20
+n_sellers = 40
+n_buyers = 40
 n_game = 1
-n_round = 10
+n_round = 5
 
 # Create initial agents with names and reservation prices
 # All agents are the same for now
@@ -40,8 +40,8 @@ buyers = np.array([LinearGenericBuyer(agent_id=names[i], reservation_price=res_p
 
 
 # For plotting
-# fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
-# ax.set_xlim(95, 205)
+fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
+ax.set_xlim(95, 205)
 
 # Loop over games
 for g in range(n_game):
@@ -98,8 +98,6 @@ for g in range(n_game):
             for agent in buyers:
                 agent.receive_observations_from_environment(market_env)
 
-            print(sellers[0].observations)
-
             # Clearing current offers
             current_offers.clear()
 
@@ -112,7 +110,7 @@ for g in range(n_game):
                 current_offers[agent.agent_id] = new_offer
 
             # for plotting
-            # _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
-            # plt.draw()
-            # plt.pause(0.1)
-            # _ = [b.remove() for b in bars0]
+            _, _, bars0 = ax.hist(list(current_offers.values()), 50, color='blue')
+            plt.draw()
+            plt.pause(0.1)
+            _ = [b.remove() for b in bars0]

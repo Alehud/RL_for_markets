@@ -1,10 +1,4 @@
-
-import numpy as np
-
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 
 
 class Actor(nn.Module):
@@ -29,7 +23,3 @@ class Actor(nn.Module):
 #         out = self.softplus(out)
         
         return out
-    
-    
-    
-    

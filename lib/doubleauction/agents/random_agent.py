@@ -1,6 +1,5 @@
 import scipy.stats
 from doubleauction.agents import MarketAgent
-import numpy as np
 from abc import abstractmethod
 
 

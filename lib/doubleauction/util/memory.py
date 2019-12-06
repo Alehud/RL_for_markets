@@ -12,7 +12,6 @@ import numpy as np
 Experience = namedtuple('Experience', 'state0, action, reward, state1, terminal1')
 
 
-
 def sample_batch_indexes(low, high, size):
     if high - low >= size:
         # We have enough data. Draw without replacement, that is each index is unique in the
@@ -32,7 +31,6 @@ def sample_batch_indexes(low, high, size):
         batch_idxs = np.random.random_integers(low, high - 1, size=size)
     assert len(batch_idxs) == size
     return batch_idxs
-
 
 
 class RingBuffer(object):
@@ -62,7 +60,6 @@ class RingBuffer(object):
             raise RuntimeError()
         self.data[(self.start + self.length - 1) % self.maxlen] = v
 
-        
 
 def zeroed_observation(observation):
     if hasattr(observation, 'shape'):
@@ -76,7 +73,6 @@ def zeroed_observation(observation):
         return 0.
 
 
-    
 class Memory(object):
     def __init__(self, window_length, ignore_episode_boundaries=False):
         self.window_length = window_length
@@ -208,7 +204,6 @@ class SequentialMemory(Memory):
 
         return state0_batch, action_batch, reward_batch, state1_batch, terminal1_batch
 
-
     def append(self, observation, action, reward, terminal, training=True):
         super(SequentialMemory, self).append(observation, action, reward, terminal, training=training)
         
@@ -270,4 +265,3 @@ class EpisodeParameterMemory(Memory):
         config = super(SequentialMemory, self).get_config()
         config['limit'] = self.limit
         return config
-    

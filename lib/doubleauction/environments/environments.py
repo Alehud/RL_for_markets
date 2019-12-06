@@ -40,8 +40,6 @@ class MarketEnvironment(Env):
             np.concatenate((np.array([np.infty] * self.n_sellers, dtype=np.float32), np.array(buyers_res_prices, dtype=np.float32)))
         )
         self.reset()
-        
-        
 
     def reset(self):
         """
