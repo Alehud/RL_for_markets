@@ -59,7 +59,7 @@ class NonlinearBlackBoxSeller(NonlinearBlackBoxAgent):
             new_offer = self.coefs[0]*self.reservation_price + self.coefs[1]*self.observations['self_last_offer']
         else:
             new_offer = (self.coefs[0] + self.coefs[2])*self.reservation_price + (self.coefs[1] - self.coefs[2])*self.observations['self_last_offer']
-        if new_offer > self.reservation_price:
+        if new_offer < self.reservation_price:
             return self.reservation_price
         else:
             return new_offer
