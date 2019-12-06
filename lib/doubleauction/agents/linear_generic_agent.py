@@ -6,7 +6,22 @@ from abc import abstractmethod
 class LinearGenericAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float, setting: dict):
         """
-        Linear generic agent
+        Linear generic agent. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He receives a boolean dictionary with settings, in which a user can state which observations
+        he/she wants to turn on/off. The possible options are:
+        'self_last_offer': previous offer of the agent
+        'same_side_last_offers': previous offers of all agents of the same side (buyers/sellers)
+        'same_side_res_prices': reservation prices of all agents of the same side (buyers/sellers)
+        'same_side_not_done': how many agents of the same side hasn't yet made a deal in current round
+        'other_side_last_offers': previous offers of all agents of the other side (buyers/sellers)
+        'other_side_res_prices': reservation prices of all agents of the other side (buyers/sellers)
+        'other_side_not_done': how many agents of the other side hasn't yet made a deal in current round
+        'completed_deals': list of all completed deals so far in the current round, contains the price of the deal and the time of the deal
+        'current_time': current time in the round
+        'max_time': time at which the round terminates no matter what
+        'n_sellers': number of sellers
+        'n_buyers': number of buyers
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
         self.setting = setting
@@ -69,11 +84,16 @@ class LinearGenericAgent(MarketAgent):
 class LinearGenericBuyer(LinearGenericAgent):
     def __init__(self, agent_id: str, reservation_price: float, setting: dict):
         """
-        A buyer who takes determines the new offer as a linear combination of all data available in observation
+        Linear generic buyer. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He receives a boolean dictionary with settings, in which a user can state which observations
+        he/she wants to turn on/off.
         """
         super().__init__(agent_id, reservation_price, setting)
 
     def compose_observation_vector(self, n_sellers: int, n_buyers: int, max_time: int):
+        """
+        Function which returns an array consisting of all available observations
+        """
         max_amount_of_deals = min(n_sellers, n_buyers)
         vals = np.array([self.reservation_price])
         if self.setting['self_last_offer']:
@@ -128,6 +148,9 @@ class LinearGenericBuyer(LinearGenericAgent):
             return new_offer
 
     def determine_size_of_coefs(self, n_sellers: int, n_buyers: int):
+        """
+        Function which determines the size of an array of coefs needed for this agent with the current setting.
+        """
         # Reservation price is always known to agent
         size = 1
         if self.setting['self_last_offer']:
@@ -162,11 +185,16 @@ class LinearGenericBuyer(LinearGenericAgent):
 class LinearGenericSeller(LinearGenericAgent):
     def __init__(self, agent_id: str, reservation_price: float, setting: dict):
         """
-        A seller who takes determines the new offer as a linear combination of all data available in observation
+        Linear generic seller. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He receives a boolean dictionary with settings, in which a user can state which observations
+        he/she wants to turn on/off.
         """
         super().__init__(agent_id, reservation_price, setting)
 
     def compose_observation_vector(self, n_sellers: int, n_buyers: int, max_time: int):
+        """
+        Function which returns an array consisting of all available observations
+        """
         max_amount_of_deals = min(n_sellers, n_buyers)
         vals = np.array([self.reservation_price])
         if self.setting['self_last_offer']:
@@ -221,6 +249,9 @@ class LinearGenericSeller(LinearGenericAgent):
             return new_offer
 
     def determine_size_of_coefs(self, n_sellers: int, n_buyers: int):
+        """
+        Function which determines the size of an array of coefs needed for this agent with the current setting.
+        """
         # Reservation price is always known to agent
         size = 1
         if self.setting['self_last_offer']:

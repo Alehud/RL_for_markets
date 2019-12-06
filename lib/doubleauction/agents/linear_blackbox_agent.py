@@ -7,7 +7,10 @@ import scipy.stats
 class LinearBlackBoxAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        Linear blackbox agent. Only self_last_offer, current_time and previous_success are known
+        Linear blackbox agent. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He knows:
+        'self_last_offer': previous offer of the agent
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
         self.observations['previous_success'] = False
@@ -41,7 +44,10 @@ class LinearBlackBoxAgent(MarketAgent):
 class LinearBlackBoxBuyer(LinearBlackBoxAgent):
     def __init__(self, agent_id: str, reservation_price: float, noisy:bool):
         """
-        A buyer who takes determines the new offer as a linear combination of all data available in observation
+        Linear blackbox buyer. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He knows:
+        'self_last_offer': previous offer of the agent
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
         
@@ -87,7 +93,10 @@ class LinearBlackBoxBuyer(LinearBlackBoxAgent):
 class LinearBlackBoxSeller(LinearBlackBoxAgent):
     def __init__(self, agent_id: str, reservation_price: float, noisy:bool):
         """
-        A seller who takes determines the new offer as a linear combination of all data available in observation
+        Linear blackbox seller. The next offer is a linear combination of all obsevations agent has and his reservation price.
+        He knows:
+        'self_last_offer': previous offer of the agent
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
         

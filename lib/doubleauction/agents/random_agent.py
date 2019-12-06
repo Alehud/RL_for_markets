@@ -7,7 +7,7 @@ from abc import abstractmethod
 class RandomAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        Linear blackbox agent. Only self_last_offer, current_time and previous_success are known
+        Random agent. His next offer is chosen randomly.
         """
         super().__init__(agent_id, reservation_price)
 
@@ -23,7 +23,7 @@ class RandomAgent(MarketAgent):
 class RandomBuyer(RandomAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        A buyer who takes determines the new offer as a linear combination of all data available in observation
+        Random buyer. His next offer is chosen randomly.
         """
         super().__init__(agent_id, reservation_price)
 
@@ -39,7 +39,7 @@ class RandomBuyer(RandomAgent):
 class RandomSeller(RandomAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        A buyer who takes determines the new offer as a linear combination of all data available in observation
+        Random seller. His next offer is chosen randomly.
         """
         super().__init__(agent_id, reservation_price)
 

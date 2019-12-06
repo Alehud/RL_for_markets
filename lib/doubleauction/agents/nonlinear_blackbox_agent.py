@@ -6,7 +6,13 @@ from abc import abstractmethod
 class NonlinearBlackBoxAgent(MarketAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        Linear blackbox agent. Only self_last_offer, current_time and previous_success are known
+        Nonlinear blackbox agent. The next offer is a linear combination of the last offer and the reservation price.
+        However, the agent has some level of aggressiveness. If his previous round was unsuccessful, he becomes more
+        aggressive and increases the coefficient in front of reservation price while decreasing the coefficient in front
+        of the last offer. This means he will faster approach his reservation price in the market trying to make a deal.
+        Agent's observations:
+        'self_last_offer': previous offer of the agent
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
         self.observations['previous_success'] = False
@@ -39,7 +45,13 @@ class NonlinearBlackBoxAgent(MarketAgent):
 class NonlinearBlackBoxBuyer(NonlinearBlackBoxAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        A buyer who takes determines the new offer as a linear combination of all data available in observation
+        Nonlinear blackbox buyer. The next offer is a linear combination of the last offer and the reservation price.
+        However, the agent has some level of aggressiveness. If his previous round was unsuccessful, he becomes more
+        aggressive and increases the coefficient in front of reservation price while decreasing the coefficient in front
+        of the last offer. This means he will faster approach his reservation price in the market trying to make a deal.
+        Agent's observations:
+        'self_last_offer': previous offer of the agent
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
 
@@ -69,7 +81,13 @@ class NonlinearBlackBoxBuyer(NonlinearBlackBoxAgent):
 class NonlinearBlackBoxSeller(NonlinearBlackBoxAgent):
     def __init__(self, agent_id: str, reservation_price: float):
         """
-        A seller who takes determines the new offer as a linear combination of all data available in observation
+        Nonlinear blackbox seller. The next offer is a linear combination of the last offer and the reservation price.
+        However, the agent has some level of aggressiveness. If his previous round was unsuccessful, he becomes more
+        aggressive and increases the coefficient in front of reservation price while decreasing the coefficient in front
+        of the last offer. This means he will faster approach his reservation price in the market trying to make a deal.
+        Agent's observations:
+        'self_last_offer': previous offer of the agent
+        'previous_success': whether the agent successfully made a deal in the previous round
         """
         super().__init__(agent_id, reservation_price)
 
