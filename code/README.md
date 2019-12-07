@@ -60,8 +60,8 @@ reinforcement learning.
 
 Results of simulations are stored in the folder 'results'.
 
-## Example
-For example, you can first try running the file 'test_nonlinear_blackbox_agent.py' 
+## Other examples
+For other examples, you can run the file 'test_nonlinear_blackbox_agent.py' 
 (you can play with parameters defined at the beginning of the file). Then run the file 
 'plot_nonlinear_blackbox_agent.py', which will plot the results of the simulations.
 
