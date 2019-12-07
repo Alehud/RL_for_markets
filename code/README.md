@@ -35,7 +35,7 @@ For a minimal running example, open the jupyter notebook `code/minimal_ddpg_simu
 ~~~
 jupyter notebook
 ~~~
-This should automatically open a browser window, if not, navigate to `localhost:8888`. Run the jupyter notebook by clicking Cell > Run All. This should replicate the one of the core results of the project.
+This should automatically open a browser window, if not, navigate to `localhost:8888` in a browser. Run the jupyter notebook by clicking Cell > Run All. This should replicate the one of the core results of the project.
 
 
 ## Library description
