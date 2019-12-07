@@ -9,6 +9,10 @@ pip install numpy
 ~~~
 pip install scipy
 ~~~
+- jupyter
+~~~
+pip install jupyter
+~~~
 - pandas 
 ~~~
 pip install pandas
@@ -22,12 +26,19 @@ pip install matplotlib
 ~~~
 pip install gym
 ~~~
-You will also have to install the internal libarary lib. 
-For this in the root directory run:
+You will also have to install the internal utility library lib. For this in the git root directory run:
 ~~~
-pip3 install -e lib
+pip3 install -e code/lib
 ~~~
-##Library description
+
+For a minimal running example, open the jupyter notebook `code/minimal_ddpg_simulation.ipynb`. To do this, open a terminal and type
+~~~
+jupyter notebook
+~~~
+This should automatically open a browser window, if not, navigate to `localhost:8888`. Run the jupyter notebook by clicking Cell > Run All. This should replicate the one of the core results of the project.
+
+
+## Library description
 The main part of the library lib is in folder 'doubleauction'. It contains:
 - Folder 'agents': agent classes of different types
 - Folder 'environments': market environment class, it stores the data about 
