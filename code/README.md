@@ -43,6 +43,10 @@ This should automatically open a browser window, if not, navigate to `localhost:
 Navigate to and open `code/minimal_ddpg_simulation.ipynb`.
 Run the jupyter notebook by clicking Cell > Run All. This should replicate the one of the core results of the project.
 
+For minimal running examples without reinforcement learning, run `code/test_nonlinear_blackbox_agent.py`.
+Then run `code/plot_nonlinear_blackbox_agent.py`, which will plot the results. You can also run
+`code/test_linear_generic_agent.py` and observe in real time how buyers and sellers linearly
+adjust their offers until they meet in the middle and make deals with each other.
 
 ## Library description
 The main part of the library lib is in folder 'doubleauction'. It contains:
@@ -58,22 +62,10 @@ the game and all agents taking part in it, and processes what happens during the
 Most of the .py and .ipynb files, which are not in the library are used to run simulations
 of games for different types of agents.
 
-For example files 'test_....py' are simulating the games for stated type of agents without
-reinforcement learning. Files 'rl_script....py' and 'DDPG_experiments....ipynb' are simulating the games for agents with
+For example files `test_*.py` are simulating the games for stated type of agents without
+reinforcement learning. Files `rl_script*.py` and `DDPG_experiments*.ipynb` are simulating the games for agents with
 reinforcement learning.
 
 Results of simulations are stored in the folder 'results'.
-
-## Other examples
-For other examples, you can run the file 'test_nonlinear_blackbox_agent.py' 
-(you can play with parameters defined at the beginning of the file). Then run the file 
-'plot_nonlinear_blackbox_agent.py', which will plot the results of the simulations.
-
-As another example, you could run 'test_linear_generic_agent.py' and see in real time
- the distribution of offers. You will observe how buyers and sellers linearly adjust their
- offers until they meet in the middle and make deals with each other.
- 
-A lot of other simulations could be done. However, most probably they will require
- from the user some simple implementation of plotting or data saving to observe the results.
 
 
