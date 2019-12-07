@@ -31,12 +31,16 @@ You will also have to install the internal utility library lib. For this in the 
 pip3 install -e code/lib
 ~~~
 
-For a minimal running example, open the jupyter notebook `code/minimal_ddpg_simulation.ipynb`. To do this, open a terminal and type
+
+## Minimal reproducible code
+
+The RL training code typically take up to 2 hours.
+However for a minimal running example with pretrained parameters, open the jupyter notebook `code/minimal_ddpg_simulation.ipynb`. To do this, open a terminal and type
 ~~~
 jupyter notebook
 ~~~
-This should automatically open a browser window, if not, navigate to `localhost:8888` in a browser. 
-Navigate to and open `code/minimal_ddpg_simulation.ipynb`. 
+This should automatically open a browser window, if not, navigate to `localhost:8888` in a browser.
+Navigate to and open `code/minimal_ddpg_simulation.ipynb`.
 Run the jupyter notebook by clicking Cell > Run All. This should replicate the one of the core results of the project.
 
 
