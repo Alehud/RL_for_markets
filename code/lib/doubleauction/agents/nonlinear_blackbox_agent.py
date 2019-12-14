@@ -63,15 +63,15 @@ class NonlinearBlackBoxBuyer(NonlinearBlackBoxAgent):
 
     def decide(self):
         
-        if self.first_ever_bid:
-            self.first_ever_bid = False
-            
-            demand = scipy.stats.halflogistic(-7.692926601910835e-08, 31.41266555783104).rvs()
-        
-            if self.reservation_price - demand < 0:
-                demand = np.random.rand()*self.reservation_price
-
-            return max(0, self.reservation_price - demand)
+        # if self.first_ever_bid:
+        #     self.first_ever_bid = False
+        #
+        #     demand = scipy.stats.halflogistic(-7.692926601910835e-08, 31.41266555783104).rvs()
+        #
+        #     if self.reservation_price - demand < 0:
+        #         demand = np.random.rand()*self.reservation_price
+        #
+        #     return max(0, self.reservation_price - demand)
 
         if self.observations['previous_success']:
             new_offer = self.coefs[0]*self.reservation_price + self.coefs[1]*self.observations['self_last_offer']

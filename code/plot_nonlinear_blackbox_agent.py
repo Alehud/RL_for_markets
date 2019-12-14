@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-aggro = 0.4
+aggro = 0.5
 rewards_buyers = np.load('results/aggressive agent/rewards_buyers_aggro' + str(aggro) + '.npy')
 rewards_sellers = np.load('results/aggressive agent/rewards_sellers_aggro' + str(aggro) + '.npy')
 demands_agents = np.load('results/aggressive agent/demands_agents_aggro' + str(aggro) + '.npy')

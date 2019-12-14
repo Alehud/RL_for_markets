@@ -63,10 +63,9 @@ class MarketEnvironment(Env):
         :param current_offers: a dictionary containing the offer per agent
         """
         
-        if self.first_in_round:
-            self.first_in_round = False
-            
-            self.agents['previous_success'] = False
+        # if self.first_in_round:
+        #     self.first_in_round = False
+        #     self.agents['previous_success'] = False
             
 #             print(self.agents['previous_success'])
         

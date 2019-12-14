@@ -12,7 +12,7 @@ my_path = os.getcwd()
 
 
 # Define the initial number of agents, the number of rounds and games
-n_sellers = 50
+n_sellers = 40
 n_buyers = 50
 n_game = 1
 n_round = 5
@@ -26,12 +26,12 @@ res_prices = generate_buyer_prices_paper(discrete=False, count=n_buyers)
 names = ['Buyer ' + str(i) for i in range(1, n_buyers + 1)]
 buyers = np.array([NonlinearBlackBoxBuyer(agent_id=names[i], reservation_price=res_prices[i]) for i in range(n_buyers)])
 
-buyers[0].reservation_price = 125
+buyers[0].reservation_price = 115
 
 # rewards_buyers = np.zeros((n_buyers, n_game))
 # rewards_sellers = np.zeros((n_sellers, n_game))
 
-aggro_array = np.array([0.0, 0.1, 0.2, 0.3, 0.4])
+aggro_array = np.array([0.5])
 for aggro in aggro_array:
     print("AGGRO", aggro, '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     rewards_buyers = np.zeros(n_buyers)
@@ -87,6 +87,7 @@ for aggro in aggro_array:
                 # print(current_offers)
                 # print(market_env.not_done_sellers)
                 # print(market_env.not_done_buyers)
+                print(buyers[0].observations)
                 demand = 0
                 for agent in sellers[market_env.not_done_sellers]:
                     demand += current_offers[agent.agent_id] - agent.reservation_price
